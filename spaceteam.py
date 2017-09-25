@@ -2,6 +2,7 @@
 
 import spaceteam
 from spaceteam import MCP23017
+from spaceteam import ADS1115
 from spaceteam import RPi
 
 import sys
@@ -16,13 +17,21 @@ def main(args):
   mcp1.set_as_output(14)
 
   mcp1.write(15, 1)
-  time.sleep(2)
+  time.sleep(0.5)
   mcp1.write(14, 1)
-  time.sleep(2)
+  time.sleep(0.5)
   mcp1.write(15, 0)
-  time.sleep(2)
+  time.sleep(0.5)
   mcp1.write(14, 0)
-  time.sleep(2)
+
+  analog = ADS1115(0x48)
+  while True:
+    v = analog.read()
+    v_max = 0xFFFF
+    v_scaled = float(v) / v_max * 100
+
+    print "sensor data: %s (%s %%)" % (format(v, "#04x"), format(v_scaled, "0.2f"))
+    time.sleep(1)
 
   print args
   return 0
