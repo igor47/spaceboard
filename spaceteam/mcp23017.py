@@ -1,7 +1,8 @@
 """Handles MCP23017 I/O Expanders on the I2C bus"""
-import smbus
 
-ACCEPTABLE_BITS = [0, 1]
+from utils import *
+
+import smbus
 
 IOCON_ADDR = 0x0A
 DESIRED_IOCON = [
@@ -25,17 +26,6 @@ OLATA_ADDR = 0x14
 OLATB_ADDR = 0x15
 
 
-
-def bitlist_to_int(bitlist):
-  out = 0
-  for bit in bitlist:
-    if not bit in ACCEPTABLE_BITS:
-      raise RuntimeError("bit %s in bitlist %s is not valid!" % (bit, bitlist))
-
-    out = (out << 1) | bit
-
-  return out
-
 class MCP23017(object):
   def __init__(self, address, bus=1):
     self.address = address
@@ -57,6 +47,12 @@ class MCP23017(object):
 
     self.output_latches[pin] = value
     self.write_output_latches()
+
+  def read(self, pin):
+    address = GPIOA_ADDR if pin < 8 else GPIOB_ADDR
+    data = self.i2c.read_byte_data(self.address, address)
+    data_bits = format(data, "08b")
+    return data_bits[(pin + 8) % 8]
 
   def set_as_output(self, pin):
     if self.inputs[pin] != 0:
