@@ -19,6 +19,14 @@ else
   pip install -U platformio
 fi
 
+# udev rules for platform
+platformio_rules='/etc/udev/rules.d/99-platformio-udev.rules'
+if [[ -e ${platformio_rules} ]]; then
+  echo 'platformio udev rules already installed'
+else
+  wget https://raw.githubusercontent.com/platformio/platformio/develop/scripts/99-platformio-udev.rules -O ${platformio_rules}
+fi
+
 # lets enable some hardware
 . raspi-config nonint
 if [ $(get_i2c) -eq 0 ]; then
@@ -49,4 +57,21 @@ else
   aptitude install -y pigpio python-pigpio
   systemctl enable pigpiod
   systemctl start pigpiod
+fi
+
+# disable bluetooth
+if [[ $(grep 'dtoverlay=pi3-disable-bt' /boot/config.txt) ]]; then
+  echo 'bluetooth already disabled'
+else
+  echo 'dtoverlay=pi3-disable-bit' >> /boot/config.txt
+  systemctl disable hciuart
+  echo 'bluetooth disabled, but a reboot will be required'
+fi
+
+# maple mini needs udev rules
+maple_rules='/etc/udev/rules/d/45-maple.rules'
+if [[ -e ${maple_rules} ]]; then
+  echo 'maple mini udev rules already exist'
+else
+  wget https://raw.githubusercontent.com/rogerclarkmelbourne/Arduino_STM32/master/tools/linux64/45-maple.rules -O ${maple_rules}
 fi
