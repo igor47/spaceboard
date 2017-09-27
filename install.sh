@@ -1,5 +1,11 @@
 #!/bin/bash
 
+# should be run as root
+if [[ $EUID -ne 0 ]]; then
+  echo "This script must be run as root"
+  exit 1
+fi
+
 # fresh sources!
 aptitude update
 
@@ -67,6 +73,17 @@ else
   systemctl disable hciuart
   echo 'bluetooth disabled, but a reboot will be required'
 fi
+
+# disable serial console
+# see: https://www.raspberrypi.org/documentation/configuration/uart.md
+if [ $(get_serial) -eq 1 ]; then
+  echo "serial already disabled"
+else
+  echo "disabling serial console"
+  do_serial 1
+  echo "serial console disabled, but a reboot will be needed"
+fi
+
 
 # maple mini needs udev rules
 maple_rules='/etc/udev/rules/d/45-maple.rules'
