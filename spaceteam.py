@@ -30,7 +30,7 @@ def main(args):
     v_max = 0xFFFF
     v_scaled = float(v) / v_max * 100
 
-    print "sensor data: %s (%s %%)" % (format(v, "#04x"), format(v_scaled, "0.2f"))
+    print "sensor data: {:.2f}%".format(analog.read(scaled=True))
     time.sleep(1)
 
   print args

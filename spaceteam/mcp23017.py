@@ -1,4 +1,8 @@
-"""Handles MCP23017 I/O Expanders on the I2C bus"""
+"""Handles MCP23017 I/O Expanders on the I2C bus
+
+More info:
+  http://ww1.microchip.com/downloads/en/DeviceDoc/20001952C.pdf
+"""
 
 from utils import *
 
