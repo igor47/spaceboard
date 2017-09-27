@@ -5,10 +5,9 @@
  * then off for one second, repeatedly.
  */
 #include "Arduino.h"
+#include "Wire.h"
 
-#ifndef LED_BUILTIN
-#define LED_BUILTIN 13
-#endif
+#define LED_BUILTIN 33
 
 void setup()
 {
@@ -18,16 +17,13 @@ void setup()
 
 void loop()
 {
-  // turn the LED on (HIGH is the voltage level)
   digitalWrite(LED_BUILTIN, HIGH);
-
-  // wait for a second
-  delay(1000);
-
-  // turn the LED off by making the voltage LOW
+  delay(500);
   digitalWrite(LED_BUILTIN, LOW);
-
-   // wait for a second
-  delay(1000);
+  delay(500);
+  digitalWrite(LED_BUILTIN, HIGH);
+  delay(500);
+  digitalWrite(LED_BUILTIN, LOW);
+  delay(2000);
 }
 
