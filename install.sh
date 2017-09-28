@@ -81,6 +81,7 @@ if [ $(get_serial) -eq 1 ]; then
 else
   echo "disabling serial console"
   do_serial 1
+  sed -i -e 's/enable_uart=./enable_uart=1/' /boot/config.txt
   echo "serial console disabled, but a reboot will be needed"
 fi
 
