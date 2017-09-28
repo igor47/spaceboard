@@ -69,7 +69,7 @@ fi
 if [[ $(grep 'dtoverlay=pi3-disable-bt' /boot/config.txt) ]]; then
   echo 'bluetooth already disabled'
 else
-  echo 'dtoverlay=pi3-disable-bit' >> /boot/config.txt
+  echo 'dtoverlay=pi3-disable-bt' >> /boot/config.txt
   systemctl disable hciuart
   echo 'bluetooth disabled, but a reboot will be required'
 fi
