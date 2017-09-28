@@ -5,14 +5,18 @@
  * then off for one second, repeatedly.
  */
 #include "Arduino.h"
+#include "Adafruit_NeoPixel.h"
+
+/*************** Constants *********************/
 
 #undef LED_BUILTIN
 #define LED_BUILTIN 33
 
-/*************** Constants *********************/
+#define LED_STRIP_PIN 14  // we chose a pin on GPIO port C in case we switch to DMA
 
 const unsigned long StateSendMS = 100; // ms
 const unsigned short BaudRate = 9600;  // baud
+Adafruit_NeoPixel strip = Adafruit_NeoPixel(20, LED_STRIP_PIN, NEO_GRB + NEO_KHZ800);
 
 /*************** Data Types  *********************/
 
@@ -33,6 +37,7 @@ static struct State {
 
 void send_state(unsigned long now);
 void toggle_led();
+void colorWipe(uint32_t c, uint8_t wait);
 
 /*************** CODE!!!!!!  *********************/
 
@@ -43,6 +48,10 @@ void setup()
 
   // initialize serial
   Serial3.begin(BaudRate);
+
+  // initialize leds
+  strip.begin();
+  strip.show();
 }
 
 void loop()
@@ -57,6 +66,11 @@ void loop()
 
   // communicate with the server
   send_state(now);
+
+  // drive the led strip
+  colorWipe(strip.Color(255, 0, 0), 50); // Red
+  colorWipe(strip.Color(0, 255, 0), 50); // Green
+  colorWipe(strip.Color(0, 0, 255), 50); // Blue
 }
 
 // sends the current program state to the computer
@@ -85,7 +99,6 @@ void send_state(unsigned long now)
   toggle_led();
 }
 
-
 void toggle_led()
 {
   if(state.runLED) {
@@ -94,5 +107,14 @@ void toggle_led()
   } else {
     digitalWrite(LED_BUILTIN, HIGH);
     state.runLED = true;
+  }
+}
+
+// Fill the dots one after the other with a color
+void colorWipe(uint32_t c, uint8_t wait) {
+  for(uint16_t i=0; i<strip.numPixels(); i++) {
+      strip.setPixelColor(i, c);
+      strip.show();
+      delay(wait);
   }
 }
