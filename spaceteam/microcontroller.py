@@ -41,7 +41,7 @@ class Microcontroller(object):
   # how stale does the state get until we are considered no longer healthy?
   HEALTH_TIMEOUT = 2
 
-  def __init__(self, port, baud_rate=9600):
+  def __init__(self, port, baud_rate=57600):
     """Connects to the microcontroller on a serial port.
 
     Args:
@@ -81,14 +81,13 @@ class Microcontroller(object):
     """Returns a dictionary of the microcontroller's status for the client"""
       status = {
           'healthy':self.is_healthy(),
-          'estop':(not self.state or self.state.emergency_stop),
           'sent':self.commands_sent,
           'recieved':self.state.commands_received if self.state else 0,
           'bad':self.state.bad_commands_received if self.state else 0,
           }
       return status
 
-  def send_command(self, command):
+  def _send_command(self, command):
     """Sends a command to the microcontroller.
 
       Args:
