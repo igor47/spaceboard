@@ -87,10 +87,11 @@ void Adafruit_NeoPixel::show(void) {
 
   noInterrupts(); // Need 100% focus on instruction timing
 
-  #define DELAY_800_T0H  2
-  #define DELAY_800_T0L  5
-  #define DELAY_800_T1H 7
-  #define DELAY_800_T1L  2
+  #define DELAY_800_T0H  1
+  #define DELAY_800_T0L  4
+  #define DELAY_800_T1H 6
+  #define DELAY_800_T1L  1
+
   #define SET_HI    (PIN_MAP[pin].gpio_device->regs->BSRR = (1U << PIN_MAP[pin].gpio_bit) << (16 *  ((uint8_t)!1)) );
   #define SET_LO   (PIN_MAP[pin].gpio_device->regs->BSRR = (1U << PIN_MAP[pin].gpio_bit) << (16 *  ((uint8_t)!0)) );
 
