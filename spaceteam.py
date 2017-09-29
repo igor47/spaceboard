@@ -4,7 +4,9 @@ import spaceteam
 from spaceteam import MCP23017
 from spaceteam import ADS1115
 from spaceteam import RPi
+from spaceteam import Microcontroller
 
+from colour import Color
 import sys
 import time
 
@@ -25,13 +27,25 @@ def main(args):
   mcp1.write(14, 0)
 
   analog = ADS1115(0x48)
-  while True:
-    v = analog.read()
-    v_max = 0xFFFF
-    v_scaled = float(v) / v_max * 100
+  microcontroller = Microcontroller("/dev/serial0")
 
-    print "sensor data: {:.2f}%".format(analog.read(scaled=True))
-    time.sleep(1)
+  starting_color = Color("blue")
+  starting_color.set_luminance(0.1)
+  ending_color = Color("orange")
+  ending_color.set_luminance(0.9)
+  c_range = list(starting_color.range_to(ending_color, 40))
+
+  while True:
+    v = int(analog.read(scaled = True))
+    idx = v if v < len(c_range) else -1
+    c = c_range[idx]
+
+    print "sending color idx %s (%s) for value %d" % (idx, c, v)
+
+    for led in xrange(20):
+      microcontroller.set_led(led, c, latch = False)
+
+    microcontroller.latch_leds()
 
   print args
   return 0

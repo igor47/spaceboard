@@ -15,22 +15,19 @@ class State(object):
       commands_sent = 0,
       commands_received = 0,
       bad_commands_received = 0,
-      ms_since_command_received = 0,
       ):
     self.timestamp = timestamp
     self.commands_sent = commands_sent
     self.commands_received = commands_received
     self.bad_commands_received = bad_commands_received
-    self.ms_since_command_received = ms_since_command_received
 
   def __repr__(self):
     return "State(timestamp=%f, commands_sent=%d, commands_received=%d, "\
-        "bad_commands_received=%d, ms_since_command_received=%d" % (
+        "bad_commands_received=%d" % (
             self.timestamp,
             self.commands_sent,
             self.commands_received,
-            self.bad_commands_received,
-            self.ms_since_command_received)
+            self.bad_commands_received)
 
 class Microcontroller(object):
   """interface to an on-board microcontroller"""
@@ -41,7 +38,7 @@ class Microcontroller(object):
   # how stale does the state get until we are considered no longer healthy?
   HEALTH_TIMEOUT = 2
 
-  def __init__(self, port, baud_rate=57600):
+  def __init__(self, port, baud_rate=256000):
     """Connects to the microcontroller on a serial port.
 
     Args:
@@ -72,6 +69,9 @@ class Microcontroller(object):
     # used to make sure only a single thread tries to write to the microcontroller
     self.write_lock = threading.Lock()
 
+    # max brightness for the leds
+    self.max_brightness = 200
+
   def stop(self):
     """Shuts down communication to the microcontroller."""
     self._serial.close()
@@ -79,13 +79,23 @@ class Microcontroller(object):
   @property
   def status(self):
     """Returns a dictionary of the microcontroller's status for the client"""
-      status = {
-          'healthy':self.is_healthy(),
-          'sent':self.commands_sent,
-          'recieved':self.state.commands_received if self.state else 0,
-          'bad':self.state.bad_commands_received if self.state else 0,
-          }
-      return status
+    status = {
+        'healthy':self.is_healthy(),
+        'sent':self.commands_sent,
+        'recieved':self.state.commands_received if self.state else 0,
+        'bad':self.state.bad_commands_received if self.state else 0,
+        }
+    return status
+
+  def _acquire_write_lock(self, timeout = 2):
+    """Acquire lock with a timeout"""
+    start_time = time.time()
+    while time.time() < start_time + timeout:
+      if self.write_lock.acquire(False):
+        return True
+      time.sleep(.05)
+
+    return False
 
   def _send_command(self, command):
     """Sends a command to the microcontroller.
@@ -97,15 +107,15 @@ class Microcontroller(object):
           True if command was sent, False if something went wrong. Note
           this doesn't guarantee the command was actually received.
     """
-    if not acquire(self.write_lock, 2):
+    if not self._acquire_write_lock():
       return False
 
     try:
       self._serial.write(command)
-        if not command.endswith('\n'):
-          self._serial.write('\n')
-        self._serial.flush()
-        self.commands_sent += 1
+      if not command.endswith('\n'):
+        self._serial.write('\n')
+      self._serial.flush()
+      self.commands_sent += 1
     finally:
       self.write_lock.release()
 
@@ -136,31 +146,63 @@ class Microcontroller(object):
     fields = {}
     for field in data.rstrip(';').split(';'):
       k, v = field.split(':')
-        fields[k] = v
+      fields[k] = v
 
     return fields
 
   def update_state(self, timeout = 0):
     """Updates the internal state with fresh data from the microcontroller"""
-    try:
-      state_fields = self._parse_data(self._read_data(timeout))
-      timestamp = time.time()
+    # first, ask fora  state update
+    self._send_command('G')
 
-      # update the state
-      new_state = State(
-          timestamp = timestamp,
-          commands_sent = self.commands_sent,
-          commands_received = int(state['C']),
-          bad_commands_received = int(state['B']),
-          ms_since_command_received = int(state['L']))
-      self.state = new_state
-
-    # failed to parse the state
-    except:
+    # now read the state from the output
+    data = self._read_data(timeout)
+    if not data:
       return False
-    else:
-      return True
 
-  def get_state(self):
-    """Returns a copy of the current state."""
-    return copy.deepcopy(self.state)
+    state_fields = self._parse_data(data)
+    timestamp = time.time()
+
+    # update the state
+    new_state = State(
+        timestamp = timestamp,
+        commands_sent = self.commands_sent,
+        commands_received = int(state_fields['C']),
+        bad_commands_received = int(state_fields['B']))
+    self.state = new_state
+
+    return self.state
+
+  def clear_leds(self):
+    """Clears (turns off) all of the leds"""
+    self._send_command('C')
+
+  def latch_leds(self):
+    """Displays the led values we've sent on the strip"""
+    self._send_command('L')
+
+  def set_led(self, number, color, latch = True):
+    """Sets as specific led to the given color; color is a Colour instance"""
+    command = "O{:d},{:d}".format(number, self.color_to_value(color))
+    self._send_command(command)
+
+    if latch:
+      self.latch_leds()
+
+  def set_led_from_list(self, colors = [], latch = True):
+    """Sets all specified colors"""
+    for i in xrange(len(colors)):
+      color = colors[i]
+      if color:
+        self.set_led(i, color, latch = False)
+
+    if latch:
+      self.latch_leds()
+
+  def color_to_value(self, color):
+    """get a value to send to microcontroller for a given color"""
+    return (
+        (int(color.red   * self.max_brightness) << 16) +
+        (int(color.green * self.max_brightness) << 8) +
+        (int(color.blue  * self.max_brightness) << 0)
+      )

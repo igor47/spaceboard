@@ -92,8 +92,9 @@ void Adafruit_NeoPixel::show(void) {
   #define DELAY_800_T1H 6
   #define DELAY_800_T1L  1
 
-  #define SET_HI    (PIN_MAP[pin].gpio_device->regs->BSRR = (1U << PIN_MAP[pin].gpio_bit) << (16 *  ((uint8_t)!1)) );
-  #define SET_LO   (PIN_MAP[pin].gpio_device->regs->BSRR = (1U << PIN_MAP[pin].gpio_bit) << (16 *  ((uint8_t)!0)) );
+  volatile uint32 *setPtr = &PIN_MAP[pin].gpio_device->regs->BSRR;
+  uint32 setHiVal = (1U << PIN_MAP[pin].gpio_bit) << (16 *  ((uint8_t)!1));
+  uint32 setLowVal = (1U << PIN_MAP[pin].gpio_bit) << (16 *  ((uint8_t)!0));
 
   uint8_t *p   = pixels,
           *end = p + numBytes, pix, mask;
@@ -102,14 +103,14 @@ void Adafruit_NeoPixel::show(void) {
     while(p < end) {
       pix = *p++;
       for(mask = 0x80; mask; mask >>= 1) {
-        SET_HI
+        *setPtr = setHiVal;
         if(pix & mask) {
           delayShort(DELAY_800_T1H);
-          SET_LO
+          *setPtr = setLowVal;
           delayShort(DELAY_800_T1L);
         } else {
           delayShort(DELAY_800_T0H);
-          SET_LO
+          *setPtr = setLowVal;
           delayShort(DELAY_800_T0L);
         }
       }

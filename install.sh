@@ -93,3 +93,6 @@ if [[ -e ${maple_rules} ]]; then
 else
   wget https://raw.githubusercontent.com/rogerclarkmelbourne/Arduino_STM32/master/tools/linux64/45-maple.rules -O ${maple_rules}
 fi
+
+# we need the colour library
+pip install colour

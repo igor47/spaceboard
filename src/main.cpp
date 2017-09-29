@@ -17,39 +17,45 @@
 #define LED_STRIP_PIN 14  // we chose a pin on GPIO port C in case we switch to DMA
 Adafruit_NeoPixel strip = Adafruit_NeoPixel(20, LED_STRIP_PIN, NEO_GRB + NEO_KHZ800);
 
-//static const uint32_t BaudRate = 57600;  // baud
-static const uint32_t BaudRate = 9600;  // baud
+static const uint32_t BaudRate = 256000;  // baud
+//static const uint32_t BaudRate = 9600;  // baud
 static uint32_t loopTime = 0;
 
 /*************** Data Types  *********************/
-struct SerialCommand {
-  enum Type {
-    BAD = -1,
-    NONE = 0,
-    GETSTATE = 1,
-    SETLED = 2,
-    CLEARLEDS = 3,
-  };
-  SerialCommand() : type(BAD), ledNum(0), red(0), green(0), blue(0) { }
-  SerialCommand(Type t) : type(t), ledNum(0), red(0), green(0), blue(0) { }
+struct Color {
+  Color() : red(0), green(0), blue(0) { }
+  Color(uint8_t r, uint8_t g, uint8_t b) : red(r), green(g), blue(b) { }
 
-  Type type;
-  uint16_t ledNum;
   uint8_t red;
   uint8_t green;
   uint8_t blue;
 };
 
+struct SerialCommand {
+  enum Type {
+    BAD = -1,
+    NONE = 0,
+    GET_STATE = 1,
+    CLEAR_LEDS = 2,
+    ONE_LED = 3,
+    BATCH_LEDS = 4,
+    LATCH = 5,
+  };
+  SerialCommand() : type(BAD), ledNum(0), ledCount(0), color(0) { }
+  SerialCommand(Type t) : type(t), ledNum(0), ledCount(0), color(0) { }
+
+  Type type;
+  uint16_t ledNum;
+  uint16_t ledCount;
+  Color *color;
+};
+
 static struct State {
   State() : badCommandsReceived(0),
     commandsReceived(0),
-    lastCommandTimestamp(0),
-    lastStateSentTimestamp(0),
     runLED(false) { }
   unsigned long badCommandsReceived;
   unsigned long commandsReceived;
-  unsigned long lastCommandTimestamp;
-  unsigned long lastStateSentTimestamp;
   bool runLED;
 } state;
 
@@ -61,6 +67,7 @@ SerialCommand parse_command_buffer(const char* buf, int len);
 void execute_command(const SerialCommand& cmd);
 void toggle_led();
 const char* scan_int(const char* buf, int* value);
+void val_to_color(uint32_t val, Color *c);
 
 /*************** CODE!!!!!!  *********************/
 
@@ -83,11 +90,6 @@ void loop()
   // get the current time
   loopTime = millis();
 
-  // if time overflows, reset last command timestamp to now instead of
-  // having a ridiculous overflow. this happens every 50 days...
-  if (state.lastCommandTimestamp > loopTime)
-    state.lastCommandTimestamp = loopTime;
-
   // communicate with the server
   SerialCommand cmd = read_server_command();
   if (cmd.type == SerialCommand::NONE ) {
@@ -98,7 +100,6 @@ void loop()
 
   // got a good command from the server; log and execute
   } else {
-    state.lastCommandTimestamp = loopTime;
     state.commandsReceived++;
     execute_command(cmd);
   }
@@ -115,13 +116,7 @@ void send_state()
   Serial3.print(state.badCommandsReceived, DEC);
   Serial3.print(";");
 
-  Serial3.print("L:");
-  Serial3.print(loopTime - state.lastCommandTimestamp, DEC);
-  Serial3.print(";");
-
   Serial3.print("\r\n");
-
-  state.lastStateSentTimestamp = millis();
   toggle_led();
 }
 
@@ -181,24 +176,39 @@ SerialCommand read_server_command()
 SerialCommand parse_command_buffer(const char* buf, int len)
 {
   // Protocol from the server:
-  // S\n                -- causes an immediate send of the current state
-  // L<char led>,<long c>\n -- sets the given led to the given color
-  // X\n                -- clear (resets all of the leds)
+  // G\n                -- causes an immediate send of the current state
+  // L\n                -- latch (forces a display of the led strip)
+  // C\n                -- clear (resets all of the leds)
+  // O<char led>,<long c>\n -- sets the given led to the given color
+  // B<char start>,<char count>,[<long c>]\n -- updates a bunch of led colors
+
+  // we declare this as an array to support the BATCH_LEDS command in the future
+  // the ONE_LED command only uses the first element of this static array
+  static Color c[10];
 
   SerialCommand cmd;
   switch (buf[0]) {
-  case 'S':
-    cmd.type = SerialCommand::GETSTATE;
-    break;
-  case 'X':
-    cmd.type = SerialCommand::CLEARLEDS;
+  case 'G':
+    cmd.type = SerialCommand::GET_STATE;
     break;
   case 'L':
-    cmd.type = SerialCommand::SETLED;
+    cmd.type = SerialCommand::LATCH;
+    break;
+  case 'C':
+    cmd.type = SerialCommand::CLEAR_LEDS;
+    break;
+  case 'O':
+    cmd.type = SerialCommand::ONE_LED;
+    cmd.ledCount = 1;
+
     int tmpN;
+
+    // scan the integer identifying the led
     buf = scan_int(buf+1, &tmpN);
     if (*buf != ',' || tmpN > UCHAR_MAX) {
       cmd.type = SerialCommand::BAD;
+
+    // scan the integer identifying the color
     } else {
       cmd.ledNum = (uint16_t)tmpN;
 
@@ -206,9 +216,8 @@ SerialCommand parse_command_buffer(const char* buf, int len)
       if (*buf != '\n' && *buf != '\r') {
         cmd.type = SerialCommand::BAD;
       } else {
-        cmd.blue  = (uint8_t)(tmpN >> 0);
-        cmd.green = (uint8_t)(tmpN >> 8);
-        cmd.red   = (uint8_t)(tmpN >> 16);
+        val_to_color(tmpN, &c[0]);
+        cmd.color = &c[0];
       }
     }
     break;
@@ -222,24 +231,32 @@ SerialCommand parse_command_buffer(const char* buf, int len)
 void execute_command(const SerialCommand& cmd)
 {
   // send state now (well, next loop)
-  if (cmd.type == SerialCommand::GETSTATE) {
+  if (cmd.type == SerialCommand::GET_STATE) {
     send_state();
   }
 
-  // set a particular led to a given color
-  if (cmd.type == SerialCommand::SETLED) {
-    strip.setPixelColor(cmd.ledNum, cmd.red, cmd.green, cmd.blue);
+  // latch -- display the current state of the led array
+  if (cmd.type == SerialCommand::LATCH) {
     strip.show();
   }
 
+  // set a particular led to a given color
+  if (cmd.type == SerialCommand::ONE_LED) {
+    Color c = cmd.color[0];
+    strip.setPixelColor(cmd.ledNum, c.red, c.green, c.blue);
+  }
+
   // clear all the leds
-  if (cmd.type == SerialCommand::CLEARLEDS) {
+  if (cmd.type == SerialCommand::CLEAR_LEDS) {
     for(uint16_t i=0; i<strip.numPixels(); i++) {
       strip.setPixelColor(i, 0, 0, 0);
     }
+    strip.show();
   }
 
-  strip.show();
+  // set a group of LEDs
+  if (cmd.type == SerialCommand::BATCH_LEDS) {
+  }
 }
 
 void toggle_led()
@@ -254,7 +271,7 @@ void toggle_led()
 }
 
 // used to read an integer from serial data
-const char* scan_int(const char* buf, int *value)
+const char* scan_int(const char* buf, int* value)
 {
   // initialize the value
   *value = 0;
@@ -275,4 +292,11 @@ const char* scan_int(const char* buf, int *value)
   // we're done
   *value = *value * sign;
   return buf;
+}
+
+void val_to_color(uint32_t val, Color *c)
+{
+  c->blue  = (uint8_t)(val >> 0);
+  c->green = (uint8_t)(val >> 8);
+  c->red   = (uint8_t)(val >> 16);
 }
