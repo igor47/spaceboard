@@ -15,8 +15,8 @@ static struct State {
   State() : badCommandsReceived(0),
     commandsReceived(0),
     runLED(false) { }
-  unsigned long badCommandsReceived;
-  unsigned long commandsReceived;
+  uint32_t badCommandsReceived;
+  uint32_t commandsReceived;
   bool runLED;
 } state;
 
@@ -84,6 +84,8 @@ void onPacket(const uint8_t* buffer, size_t size)
   }
 
   // Protocol from the server:
+  uint32_t prevBad = state.badCommandsReceived;
+
   switch(buffer[0]) {
     // GET_STATE: causes an immediate send of the current state
     case 'G':
@@ -120,6 +122,10 @@ void onPacket(const uint8_t* buffer, size_t size)
         state.badCommandsReceived++;
       }
       break;
+  }
+
+  if (state.badCommandsReceived == prevBad) {
+    state.commandsReceived += 1;
   }
 }
 
