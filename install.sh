@@ -96,3 +96,6 @@ fi
 
 # we need the colour library
 pip install colour
+
+# we use cobs to talk to the microcontroller
+pip install cobs

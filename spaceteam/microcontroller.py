@@ -1,12 +1,14 @@
 #!/usr/bin/python
 
-import copy
+from cobs import cobs
 import logging
 import os
 import select
 import serial
 import threading
 import time
+
+from cmdmessenger import CmdMessenger
 
 class State(object):
   """Represents the microcontroller's current state."""
@@ -35,10 +37,7 @@ class Microcontroller(object):
   # Timeout for buffered serial I/O in seconds.
   IO_TIMEOUT_SEC = 5
 
-  # how stale does the state get until we are considered no longer healthy?
-  HEALTH_TIMEOUT = 2
-
-  def __init__(self, port, baud_rate=256000):
+  def __init__(self, port, baud_rate=115200):
     """Connects to the microcontroller on a serial port.
 
     Args:
@@ -97,7 +96,7 @@ class Microcontroller(object):
 
     return False
 
-  def _send_command(self, command):
+  def _send_command(self, data = []):
     """Sends a command to the microcontroller.
 
       Args:
@@ -111,9 +110,10 @@ class Microcontroller(object):
       return False
 
     try:
-      self._serial.write(command)
-      if not command.endswith('\n'):
-        self._serial.write('\n')
+      encoded = cobs.encode(str(bytearray(data)))
+
+      self._serial.write(encoded)
+      self._serial.write('\x00')
       self._serial.flush()
       self.commands_sent += 1
     finally:
@@ -150,7 +150,7 @@ class Microcontroller(object):
 
     return fields
 
-  def update_state(self, timeout = 0):
+  def update_status(self, timeout = 0):
     """Updates the internal state with fresh data from the microcontroller"""
     # first, ask fora  state update
     self._send_command('G')
@@ -183,7 +183,7 @@ class Microcontroller(object):
 
   def set_led(self, number, color, latch = True):
     """Sets as specific led to the given color; color is a Colour instance"""
-    command = "O{:d},{:d}".format(number, self.color_to_value(color))
+    command = ["O", number] + [int(i * self.max_brightness) for i in color.rgb]
     self._send_command(command)
 
     if latch:
@@ -198,11 +198,3 @@ class Microcontroller(object):
 
     if latch:
       self.latch_leds()
-
-  def color_to_value(self, color):
-    """get a value to send to microcontroller for a given color"""
-    return (
-        (int(color.red   * self.max_brightness) << 16) +
-        (int(color.green * self.max_brightness) << 8) +
-        (int(color.blue  * self.max_brightness) << 0)
-      )
