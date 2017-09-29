@@ -69,7 +69,7 @@ class Microcontroller(object):
     self.write_lock = threading.Lock()
 
     # max brightness for the leds
-    self.max_brightness = 200
+    self.max_brightness = 180
 
   def stop(self):
     """Shuts down communication to the microcontroller."""
@@ -183,18 +183,30 @@ class Microcontroller(object):
 
   def set_led(self, number, color, latch = True):
     """Sets as specific led to the given color; color is a Colour instance"""
-    command = ["O", number] + [int(i * self.max_brightness) for i in color.rgb]
+    command = ["O", number] + self.color_to_bit_list(color)
     self._send_command(command)
 
     if latch:
       self.latch_leds()
 
-  def set_led_from_list(self, colors = [], latch = True):
+  def set_led_batch(self, first_led, colors = [], latch = True):
     """Sets all specified colors"""
-    for i in xrange(len(colors)):
-      color = colors[i]
-      if color:
-        self.set_led(i, color, latch = False)
+    group_size = 10 # we will set up to 10 leds at once
+
+    while len(colors) > 0:
+      current = colors[:group_size]
+      color_bytes_lists = [self.color_to_bit_list(c) for c in current]
+      color_bytes = [item for sublist in color_bytes_lists for item in sublist]
+      command = ["B", first_led] + color_bytes
+      self._send_command(command)
+
+      # set up for next loop
+      first_led += group_size
+      colors = colors[group_size:]
 
     if latch:
       self.latch_leds()
+
+  def color_to_bit_list(self, color):
+    """converts a color into a list of rgb uint8_ts based on max_brightness"""
+    return [int(i * self.max_brightness) for i in color.rgb]

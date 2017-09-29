@@ -32,20 +32,17 @@ def main(args):
   starting_color = Color("blue")
   starting_color.set_luminance(0.1)
   ending_color = Color("orange")
-  ending_color.set_luminance(0.9)
-  c_range = list(starting_color.range_to(ending_color, 40))
+  ending_color.set_luminance(0.8)
+  c_range = list(starting_color.range_to(ending_color, 41))
 
   while True:
     v = int(analog.read(scaled = True))
     idx = v if v < len(c_range) else -1
     c = c_range[idx]
+    count = (idx >> 1) + 1
 
     print "sending color idx %s (%s) for value %d" % (idx, c, v)
-
-    for led in xrange(20):
-      microcontroller.set_led(led, c, latch = False)
-
-    microcontroller.latch_leds()
+    microcontroller.set_led_batch(1, [c] * (count) + [Color("black")] * (20 - count))
 
   print args
   return 0

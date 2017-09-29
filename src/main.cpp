@@ -107,6 +107,19 @@ void onPacket(const uint8_t* buffer, size_t size)
         state.badCommandsReceived++;
       }
       break;
+
+    // BATCH<first_led>,<r1>,<g1><b1>...<rN>,<gN>,<bN>: sets a bunch of entries at once
+    case 'B':
+      if(size >= 5 && (size - 2) % 3 == 0) {
+        uint16_t pixel = (uint16_t)buffer[1];
+        for(uint8_t cur = 2; cur < size; cur += 3) {
+          strip.setPixelColor(pixel, buffer[cur], buffer[cur+1], buffer[cur+2]);
+          pixel++;
+        }
+      } else {
+        state.badCommandsReceived++;
+      }
+      break;
   }
 }
 
