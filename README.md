@@ -1,7 +1,7 @@
 
 # spaceboard #
 
-controls the files for my spaceteam console.
+the files for my spaceteam console.
 this repo is a [platformio](http://platformio.org/) project and also a python project meant to run on a raspberry pi.
 
 ## microcontroller ##
@@ -20,7 +20,7 @@ you can figure out what the path is by running `sudo strace -e open dfu-util -l`
 ## raspberry pi ##
 
 i used [this pi that comes with a case and heatsinks](http://amzn.to/2xKNtbG) and [this breakout board/cable](http://amzn.to/2fFmc4l).
-i used problems powering the pi with a random 5V power supply -- undervoltages would cause reboots.
+i had problems powering the pi with a random 5V power supply -- undervoltages would cause reboots.
 using an [official power supply](http://amzn.to/2fDrOvQ) made life easier.
 
 ### python ###
@@ -70,6 +70,20 @@ to talk between the pi and the microcontroller, i used [a binary protocol](https
 this is fast and efficient, i highly recommend using it.
 the microcontroller library is in `lib/PacketSerial` and on the python side the code in `spaceteam/microcontroller.py` uses a [built-in library](https://pythonhosted.org/cobs/cobs.cobs.html#cobs-examples).
 TODO: i haven't figured out how to *read* the data off the microcontroller from python yet, since python 2.7 removes the ability to set a custom `eol` character for `serial.readline()`; i'll probably have to read one char at a time, but still a binary protocol is way faster and more reliable.
+
+## wiring overview ##
+
+no diagram right now.
+the basic idea is:
+
+* raspberry pi is connected to an ethernet hub and to power supply via microusb port
+* pi I2C bus is connected to an ads1115 and an mcp23017
+* pi `/dev/serial0` tty is connected to `Serial3` on the maple mini
+* pi USB connected to maple mini USB for programming (via `platformio`) and debugging (via `Serial` on maple and `miniterm.py` on Pi)
+* maple mini is connected to led strip
+* potentiometers on the ads1115, switches on the mcp23017
+* 3.3V bus powers all the peripherals
+* LED strip powered by separate 5V power brick
 
 ## switches ##
 
