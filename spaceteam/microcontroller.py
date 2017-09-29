@@ -1,41 +1,20 @@
 #!/usr/bin/python
 
 from cobs import cobs
-import logging
-import os
+import io
 import select
 import serial
+import struct
 import threading
 import time
 
 from cmdmessenger import CmdMessenger
 
-class State(object):
-  """Represents the microcontroller's current state."""
-  def __init__(self,
-      timestamp = time.time(),
-      commands_sent = 0,
-      commands_received = 0,
-      bad_commands_received = 0,
-      ):
-    self.timestamp = timestamp
-    self.commands_sent = commands_sent
-    self.commands_received = commands_received
-    self.bad_commands_received = bad_commands_received
-
-  def __repr__(self):
-    return "State(timestamp=%f, commands_sent=%d, commands_received=%d, "\
-        "bad_commands_received=%d" % (
-            self.timestamp,
-            self.commands_sent,
-            self.commands_received,
-            self.bad_commands_received)
-
 class Microcontroller(object):
   """interface to an on-board microcontroller"""
 
   # Timeout for buffered serial I/O in seconds.
-  IO_TIMEOUT_SEC = 5
+  IO_TIMEOUT_SEC = 2
 
   def __init__(self, port, baud_rate=115200):
     """Connects to the microcontroller on a serial port.
@@ -55,18 +34,19 @@ class Microcontroller(object):
         bytesize=8,
         parity='N',
         stopbits=1,
-        timeout=self.IO_TIMEOUT_SEC, writeTimeout=self.IO_TIMEOUT_SEC)
+        timeout=self.IO_TIMEOUT_SEC)
     if not self._serial.isOpen():
       raise ValueError("Couldn't open %s" % port)
 
-    # container for the internal state
-    self.state = None
+    # holds reads until we encounter a 0-byte (COBS!!!)
+    self._read_buf = [None] * 256
+    self._read_buf_pos = 0
 
     # How many commands we've sent to the microcontroller.
     self.commands_sent = 0
 
-    # used to make sure only a single thread tries to write to the microcontroller
-    self.write_lock = threading.Lock()
+    # used to make sure only a single thread tries to do I/O
+    self.io_lock = threading.Lock()
 
     # max brightness for the leds
     self.max_brightness = 180
@@ -75,22 +55,11 @@ class Microcontroller(object):
     """Shuts down communication to the microcontroller."""
     self._serial.close()
 
-  @property
-  def status(self):
-    """Returns a dictionary of the microcontroller's status for the client"""
-    status = {
-        'healthy':self.is_healthy(),
-        'sent':self.commands_sent,
-        'recieved':self.state.commands_received if self.state else 0,
-        'bad':self.state.bad_commands_received if self.state else 0,
-        }
-    return status
-
-  def _acquire_write_lock(self, timeout = 2):
+  def _acquire_io_lock(self, timeout = 2):
     """Acquire lock with a timeout"""
     start_time = time.time()
     while time.time() < start_time + timeout:
-      if self.write_lock.acquire(False):
+      if self.io_lock.acquire(False):
         return True
       time.sleep(.05)
 
@@ -106,7 +75,7 @@ class Microcontroller(object):
           True if command was sent, False if something went wrong. Note
           this doesn't guarantee the command was actually received.
     """
-    if not self._acquire_write_lock():
+    if not self._acquire_io_lock():
       return False
 
     try:
@@ -117,61 +86,68 @@ class Microcontroller(object):
       self._serial.flush()
       self.commands_sent += 1
     finally:
-      self.write_lock.release()
+      self.io_lock.release()
 
     return True
 
-  def _read_data(self, timeout = None):
-    """Reads a data line from the microcontroller"""
-    if timeout is None:
-      timeout = self.IO_TIMEOUT_SEC
+  def _reset_read_buf(self):
+    self._read_buf[0:self._read_buf_pos] = [None] * self._read_buf_pos
+    self._read_buf_pos = 0
 
-    line = None
+  def _recv_command(self):
+    """Reads a full line from the microcontroller
 
-    # Wait for up to timeout seconds for data to become available.
-    select.select([self._serial], [], [], timeout)
-    if self._serial.inWaiting() != 0:
-      line = self._serial.readline().strip()
-
-    return line
-
-  def _parse_data(self, data):
-    """Parses the microcontroller raw microcontroller data into meaningful fields
-
-      The microcontroller sends back newline-terminated ascii data.
-      Each data line is broken up into fields like so:
-          (Field name):(Field data);
-      and fields are concatenated together with no spaces
-    """
-    fields = {}
-    for field in data.rstrip(';').split(';'):
-      k, v = field.split(':')
-      fields[k] = v
-
-    return fields
-
-  def update_status(self, timeout = 0):
-    """Updates the internal state with fresh data from the microcontroller"""
-    # first, ask fora  state update
-    self._send_command('G')
-
-    # now read the state from the output
-    data = self._read_data(timeout)
-    if not data:
+    We expect to complete a read when this is invoked, so don't invoke unless
+    you expect to get data from the microcontroller. we raise a timeout if we
+    cannot read a command in the alloted timeout interval."""
+    if not self._acquire_io_lock():
       return False
 
-    state_fields = self._parse_data(data)
-    timestamp = time.time()
+    try:
+      # we rely on the passed-in timeout
+      while True:
+        c = self._serial.read(1)
+        if not c:
+          raise serial.SerialTimeoutException(
+              "Couldn't recv command in %d seconds" % self.IO_TIMEOUT_SEC)
 
-    # update the state
-    new_state = State(
-        timestamp = timestamp,
-        commands_sent = self.commands_sent,
-        commands_received = int(state_fields['C']),
-        bad_commands_received = int(state_fields['B']))
-    self.state = new_state
+        # finished reading an entire COBS structure
+        if c == '\x00':
+          # grab the data and reset the buffer
+          data = self._read_buf[0:self._read_buf_pos]
+          self._reset_read_buf()
 
-    return self.state
+          # return decoded data
+          return cobs.decode(str(bytearray(data)))
+
+        # still got reading to do
+        else:
+          self._read_buf[self._read_buf_pos] = c
+          self._read_buf_pos += 1
+
+          # ugh. buffer overflow. wat do?
+          if self._read_buf_pos == len(self._read_buf):
+            # resetting the buffer likely means the next recv will fail, too (we lost the start bits)
+            self._reset_read_buf()
+            raise RuntimeError("IO read buffer overflow :(")
+
+    finally:
+      self.io_lock.release()
+
+  def get_state(self):
+    """Updates the internal state with fresh data from the microcontroller"""
+    # first, ask for a state update
+    self._send_command('G')
+
+    # we expect the microcontroller to respond quickly
+    data = self._recv_command()
+    if data[0] != 'S' or len(data) != 9:
+      raise RuntimeError("Invalid response (with code %s len %d) to a state request" % (data[0]), len(data))
+
+    return {
+        'received': struct.unpack('>I', data[1:5]),
+        'bad': struct.unpack('>I', data[5:9]),
+      }
 
   def clear_leds(self):
     """Clears (turns off) all of the leds"""
