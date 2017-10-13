@@ -14,44 +14,13 @@ wiringpi.wiringPiSetup()
 
 RESET_PIN = 29
 
-# initialize I2C using smbus
-import smbus
-_SMBUS = smbus.SMBus(self.bus)
-
-# we use a lock so that only one peripheral can use the I2C bus
-from contextlib import contextmanager
-from threading import Lock
-
-_SMBUS_LOCK = Lock()
-_SMBUS_LOCK_TIMEOUT_SEC = 0.5
-
-@contextmanager
-def _grab_smbus_lock():
-  locked = False
-  give_up_time = time.time() + _SMBUS_LOCK_TIMEOUT_SEC
-
-  try:
-    while True:
-      locked = _SMBUS_LOCK.aquire(False)
-      if locked:
-        yield True
-        break
-
-      if time.time() > give_up_time:
-        raise SMBUSTimeout(
-            "Gave up waiting for the SMBUS after %f seconds" % _SMBUS_LOCK_TIMEOUT_SEC)
-
-  finally:
-    if locked:
-      _SMBUS_LOCK.release()
-
-_SMBUS.lock_grabber = _grab_smbus_lock
-
-# some constants for I2C
-I2C_ALL_CALL = 0x0 # all call address -- goes to all devices (that support it)
-I2C_SOFT_RESET = 0x06 # all devices reset
+# initialize I2C
+from spacebus import Spacebus
+_SMBUS = Spacebus()
 
 # lets start initializing our peripherals
+LED_STRIP = []
+
 import Microcontroller
 MAPLE = Microcontroller()
 
@@ -91,9 +60,7 @@ def reset_all():
   # reset any ADC devices
   adcs = [p for p in ALL if type(p) == ADS1115]
   if len(adcs) > 0:
-    # i2c all-call reset
-    with _SMBUS.lock_grabber():
-      self.i2c.write_byte(I2C_ALL_CALL, I2C_SOFT_RESET)
+    _SMBUS.all_call_reset()
 
     # send config to any devices
     for adc in adcs:
