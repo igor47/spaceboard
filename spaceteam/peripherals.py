@@ -6,8 +6,6 @@ Initializes and provides access to board peripherals
 import time
 import threading
 
-from errors import *
-
 # initialize GPIO
 import wiringpi
 wiringpi.wiringPiSetup()
@@ -17,9 +15,6 @@ RESET_PIN = 29
 # initialize I2C
 from spacebus import Spacebus
 _SMBUS = Spacebus()
-
-# lets start initializing our peripherals
-LED_STRIP = []
 
 import Microcontroller
 MAPLE = Microcontroller()
@@ -70,4 +65,3 @@ def reset_all():
   micros = [p for p in ALL if type(p) == Microcontroller]
   for micro in micros:
     micro.reset()
-
