@@ -4,6 +4,7 @@ Initializes and provides access to board peripherals
 """
 
 import time
+import threading
 
 from errors import *
 
@@ -60,15 +61,21 @@ ANALOG1 = ADS1115()
 import MCP23017
 MCP48 = MCP23017()
 
-ALL_PERIPHERALS = [
+ALL = [
     MAPLE,
     ANALOG1,
     MCP48,
     ]
 
 def reset_all():
+  """resets all peripherals
+
+  you'll need to restart the reader thread after calling this"""
+  # can't reset and read at the same time!
+  stop_reading()
+
   # re-initalize any mcp port expanders
-  mcps = [p for p in ALL_PERIPHERALS if type(p) == MCP23017]
+  mcps = [p for p in ALL if type(p) == MCP23017]
   if len(mcps) > 0:
     # send a reset to re-init all the mcps
     wiringpi.pinMode(RESET_PIN, wiringpi.OUTPUT)
@@ -79,10 +86,10 @@ def reset_all():
 
     # send initial config to every mcp
     for mcp in mcps:
-      mcp.send_init_config()
+      mcp.reset()
 
   # reset any ADC devices
-  adcs = [p for p in ALL_PERIPHERALS if type(p) == ADS1115]
+  adcs = [p for p in ALL if type(p) == ADS1115]
   if len(adcs) > 0:
     # i2c all-call reset
     with _SMBUS.lock_grabber():
@@ -93,6 +100,7 @@ def reset_all():
       adc.write_config()
 
   # reset any microcontrollers
-  micros = [p for p in ALL_PERIPHERALS if type(p) == Microcontroller]
+  micros = [p for p in ALL if type(p) == Microcontroller]
   for micro in micros:
     micro.reset()
+

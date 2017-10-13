@@ -7,6 +7,7 @@ More info:
 from utils import *
 
 import smbus
+import time
 
 IOCON_ADDR = 0x0A
 DESIRED_IOCON = [
@@ -29,18 +30,38 @@ GPIOB_ADDR = 0x13
 OLATA_ADDR = 0x14
 OLATB_ADDR = 0x15
 
-
 class MCP23017(object):
-  def __init__(self, address, bus=1):
+  def __init__(self, smbus, address)
+    self.smbus = smbus
     self.address = address
-    self.bus = bus
 
-    self.i2c = smbus.SMBus(self.bus)
     self.inputs = [1] * 16
     self.output_latches = [0] * 16
+    self.input_latches = [None] * 16
 
-    self.set_iocon()
-    self.set_pin_modes()
+    self.reset()
+
+  def reset(self):
+    """initializes us in a sane configuration"""
+    self._set_iocon()
+    self._set_pin_modes()
+    self._write_output_latches()
+
+  def read(self, pin):
+    """returns pin value from inputs"""
+
+    # something went wrong!
+    if self.inputs_latches[pin] is None:
+      if self.inputs[pin] == 1:
+        raise RuntimeError(
+            "Tried to read pin %s, but that pin is an output pin!" % pin)
+      else:
+        raise RuntimeError(
+            "Tried to read pin %s, but it's state is not available!" % pin)
+
+    # return the value
+    else:
+      return self.input_latches[pin]
 
   def write(self, pin, value):
     if self.inputs[pin] != 0:
@@ -50,33 +71,48 @@ class MCP23017(object):
       raise RuntimeError("Value %s (written to MCP at %s pin %s) is not a valid bit" % (value, self.address, pin))
 
     self.output_latches[pin] = value
-    self.write_output_latches()
+    self._write_output_latches()
 
-  def read(self, pin):
-    address = GPIOA_ADDR if pin < 8 else GPIOB_ADDR
-    data = self.i2c.read_byte_data(self.address, address)
-    data_bits = format(data, "08b")
-    return data_bits[(pin + 8) % 8]
+  def read_inputs(self):
+    """Reads the state of input pins into a local register
+
+    Sets local register to a list of length 16, with states at 0 or 1 for input
+    pins or None for output pins"""
+    bits = []
+    with self.smbus.lock_grabber():
+      for port in [GPIOA_ADDR, GPIOB_ADDR]:
+        data = self.smbus.read_byte_data(self.address, address)
+        port_bits = list(format(data, "08b"))
+        bits += port_bits
+
+    # now bits contains 0s and 1s for each input, but we
+    # should ignore output pins
+    for pin, is_input in enumerate(self.inputs):
+      if not is_input:
+        bits[pin] = None
+
+    self.input_latches = bits
 
   def set_as_output(self, pin):
     if self.inputs[pin] != 0:
       self.inputs[pin] = 0
-      self.set_pin_modes()
+      self._set_pin_modes()
 
   def set_as_input(self, pin):
     if self.inputs[pin] != 1:
       self.inputs[pin] = 1
-      self.set_pin_modes()
+      self._set_pin_modes()
 
-  def set_iocon(self):
+  def _set_iocon(self):
     """set the controls we want for the rest of our interactions with the chip"""
     self.i2c.write_byte_data(self.address, IOCON_ADDR, bitlist_to_int(DESIRED_IOCON))
 
-  def set_pin_modes(self):
+  def _set_pin_modes(self):
+    """configure pins as either inputs or outputs"""
     self.i2c.write_byte_data(self.address, IODIRA_ADDR, bitlist_to_int(self.inputs[0:8]))
     self.i2c.write_byte_data(self.address, IODIRB_ADDR, bitlist_to_int(self.inputs[8:16]))
 
-  def write_output_latches(self):
+  def _write_output_latches(self):
+    """for output pins, sets their output value from internal state"""
     self.i2c.write_byte_data(self.address, OLATA_ADDR, bitlist_to_int(self.output_latches[0:8]))
     self.i2c.write_byte_data(self.address, OLATB_ADDR, bitlist_to_int(self.output_latches[8:16]))
-    print self.output_latches
