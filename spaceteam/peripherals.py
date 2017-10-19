@@ -23,7 +23,7 @@ import ADS1115
 ANALOG1 = ADS1115()
 
 import MCP23017
-MCP48 = MCP23017()
+MCP48 = MCP23017(_SMBUS, 0x48)
 
 ALL = [
     MAPLE,
@@ -59,7 +59,7 @@ def reset_all():
 
     # send config to any devices
     for adc in adcs:
-      adc.write_config()
+      adc.reset()
 
   # reset any microcontrollers
   micros = [p for p in ALL if type(p) == Microcontroller]

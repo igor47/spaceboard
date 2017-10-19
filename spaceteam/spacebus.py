@@ -11,6 +11,8 @@ import smbus
 from contextlib import contextmanager
 from threading import Lock
 
+from errors import SMBUSTimeout
+
 # we just hard-code this here for our project
 BUS_ID = 1
 

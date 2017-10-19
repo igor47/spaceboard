@@ -3,6 +3,7 @@
 The collection of our various types of controls
 """
 
+import peripherals
 from colour import Color
 
 class Switch(object):
@@ -186,8 +187,34 @@ class Keypad(object):
       btn.read()
 
 class Analog(object):
+  CHANGE_THRESHOLD = 0.05
+
   """An analog input (potentiometer)"""
-  pass
+  def __init__(self, device, pin):
+    self.device = device
+    self.pin = pin
+
+    # initialize hysterisis
+    self.prev_value = None
+    self.value = None
+
+    # enable reading that pin
+    self.device.enable_pin(pin)
+
+  def read(self):
+    cur_value = self.device.read(self.pin, scaled = True)
+
+    # we only save the new value if it's changed more than threshold
+    # this prevents oscillating due to analog jitter
+    change = abs(1 - self.value/cur_value)
+    if change > self.CHANGE_THRESHOLD:
+      self.prev_value = self.value
+      self.value = self.cur_value
+
+    self.after_read()
+
+  def after_read(self):
+    pass
 
 class RotaryEncoder(object):
   """A rotary encoder!"""
