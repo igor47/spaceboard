@@ -17,13 +17,13 @@ from spacebus import Spacebus
 _SMBUS = Spacebus()
 
 import Microcontroller
-MAPLE = Microcontroller()
+MAPLE = Microcontroller("/dev/serial0")
 
 import ADS1115
-ANALOG1 = ADS1115()
+ANALOG1 = ADS1115(_SMBUS, 0x48)
 
 import MCP23017
-MCP48 = MCP23017(_SMBUS, 0x48)
+MCP20 = MCP23017(_SMBUS, 0x20)
 
 ALL = [
     MAPLE,
@@ -32,12 +32,7 @@ ALL = [
     ]
 
 def reset_all():
-  """resets all peripherals
-
-  you'll need to restart the reader thread after calling this"""
-  # can't reset and read at the same time!
-  stop_reading()
-
+  """resets all peripherals"""
   # re-initalize any mcp port expanders
   mcps = [p for p in ALL if type(p) == MCP23017]
   if len(mcps) > 0:
