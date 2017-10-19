@@ -216,6 +216,41 @@ class Analog(object):
   def after_read(self):
     pass
 
+class Accelerator(Analog):
+  """A potentiometer with LEDs indicating the position"""
+  def __init__(self, device, pin, first_led_id, led_count):
+    Analog.__init__(self, device, pin)
+    self.first_led_id = first_led_id
+    self.led_count = led_count
+
+    # configure the colors
+    starting_color = Color("blue")
+    starting_color.set_luminance(0.1)
+    ending_color = Color("orange")
+    ending_color.set_luminance(0.8)
+    self.color_range = list(starting_color.range_to(ending_color, 41))
+
+  def after_read(self):
+    self.set_leds()
+
+  def set_leds(self):
+    """loads the attached led string with the correct colors"""
+    # no nothing if the position hasn't changed
+    if self.value == self.prev_value:
+      pass
+
+    pct = float(self.value) / 100
+    last_led_on = int(pct * self.led_count)
+
+    color_range_idx = int(pct * len(self.color_range))
+    on_color = self.color_range[color_range_idx]
+
+    new_colors = \
+        [on_color] * last_led_on \                          # the leds that are on
+        + [Color("black")] * (self.led_count - last_led_on) # leds that are off
+
+    peripherals.MAPLE.set_led_batch(self.first_led_id, new_colors)
+
 class RotaryEncoder(object):
   """A rotary encoder!"""
   pass
