@@ -1,4 +1,3 @@
-"""A collection of useful modules for playing spaceteam"""
+"""some stuff we want to put in the main module namespace"""
 
-# nothing to do here ATM
-pass
+from client import Client
