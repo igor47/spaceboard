@@ -1,5 +1,7 @@
 #!/usr/bin/env python2.7
 
+from RPi import GPIO
+
 import spaceteam
 from spaceteam import Client
 from spaceteam import PeripheralReader
@@ -73,4 +75,7 @@ def main(args):
 # run spaceteam!
 import sys
 if __name__ == "__main__":
-  sys.exit(main(sys.argv[1:]))
+  try:
+    sys.exit(main(sys.argv[1:]))
+  finally:
+    GPIO.cleanup()
