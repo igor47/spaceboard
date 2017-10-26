@@ -10,6 +10,7 @@ import smbus
 
 from contextlib import contextmanager
 from threading import Lock
+import time
 
 from errors import SMBUSTimeout
 
@@ -20,16 +21,16 @@ BUS_ID = 1
 I2C_ALL_CALL = 0x0 # all call address -- goes to all devices (that support it)
 I2C_SOFT_RESET = 0x06 # all devices reset
 
-class Spacebus(smbus.SMBus):
+class Spacebus(object):
   LOCK_TIMEOUT_SEC = 0.5
 
   def __init__(self):
-    smbus.SMBus.__init__(self, BUS_ID)
+    self.bus = smbus.SMBus(BUS_ID)
     self.lock = Lock()
 
   def all_call_reset(self):
     with self.lock_grabber():
-      self.i2c.write_byte(I2C_ALL_CALL, I2C_SOFT_RESET)
+      self.bus.write_byte(I2C_ALL_CALL, I2C_SOFT_RESET)
 
   @contextmanager
   def lock_grabber(self):
@@ -38,7 +39,7 @@ class Spacebus(smbus.SMBus):
 
     try:
       while True:
-        locked = self.lock.aquire(False)
+        locked = self.lock.acquire(False)
         if locked:
           yield True
           break
@@ -51,4 +52,5 @@ class Spacebus(smbus.SMBus):
       if locked:
         self.lock.release()
 
-
+  def __getattr__(self, name):
+    return getattr(self.bus, name)
