@@ -34,7 +34,8 @@ void clearStrip();
 #define LED_BUILTIN 33
 
 #define LED_STRIP_PIN 14  // we chose a pin on GPIO port C in case we switch to DMA
-Adafruit_NeoPixel strip = Adafruit_NeoPixel(20, LED_STRIP_PIN, NEO_GRB + NEO_KHZ800);
+#define LED_COUNT 45
+Adafruit_NeoPixel strip = Adafruit_NeoPixel(LED_COUNT, LED_STRIP_PIN, NEO_GRB + NEO_KHZ800);
 
 static const uint32_t BaudRate = 115200;  // baud
 static PacketSerial packetSerial;
