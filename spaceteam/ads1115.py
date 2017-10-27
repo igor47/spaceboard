@@ -40,9 +40,6 @@ class ADS1115(object):
     self.pins_enabled = [False] * 4
     self.pin_values = [None] * 4
 
-    # write initial config
-    self.reset()
-
   def read_inputs(self):
     """reads all enabled pins and stores the values locally"""
     for pin, is_enabled in enumerate(self.pins_enabled):
