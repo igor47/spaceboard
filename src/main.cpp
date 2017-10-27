@@ -123,6 +123,12 @@ void onPacket(const uint8_t* buffer, size_t size)
         state.badCommandsReceived++;
       }
       break;
+
+    // RESET: resets the device
+    case 'R':
+      nvic_sys_reset();
+      break;  // we never get here
+
   }
 
   if (state.badCommandsReceived == prevBad) {

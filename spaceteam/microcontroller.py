@@ -149,6 +149,10 @@ class Microcontroller(object):
         'bad': struct.unpack('>I', data[5:9]),
       }
 
+  def reset(self):
+    """Resets the device"""
+    self._send_command('R')
+
   def clear_leds(self):
     """Clears (turns off) all of the leds"""
     self._send_command('C')

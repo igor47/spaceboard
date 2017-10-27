@@ -10,25 +10,27 @@ import threading
 import wiringpi
 wiringpi.wiringPiSetup()
 
-RESET_PIN = 29
+RESET_PIN = 27
 
 # initialize I2C
 from spacebus import Spacebus
 _SMBUS = Spacebus()
 
-import Microcontroller
+from microcontroller import Microcontroller
 MAPLE = Microcontroller("/dev/serial0")
 
-import ADS1115
+from ads1115 import ADS1115
 ANALOG1 = ADS1115(_SMBUS, 0x48)
 
-import MCP23017
-MCP20 = MCP23017(_SMBUS, 0x20)
+from mcp23017 import MCP23017
+MCP26 = MCP23017(_SMBUS, 0x26)
+MCP27 = MCP23017(_SMBUS, 0x27)
 
 ALL = [
     MAPLE,
-    ANALOG1,
-    MCP48,
+    MCP26,
+    MCP27,
+    #ANALOG1,
     ]
 
 def reset_all():
