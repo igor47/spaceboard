@@ -44,7 +44,7 @@ class PeripheralReader(threading.Thread):
     while not self._stop.isSet():
       deadline = time.time() + self.DEADLINE_SEC
       for p in self.peripherals:
-        p.read_inputs()
+        p.communicate()
 
       overrun_ms = (time.time() - deadline) * 1000
       if overrun_ms > 0:

@@ -7,7 +7,7 @@ import time
 
 m = peripherals.MCP27
 while True:
-  m.read_inputs()
+  m.communicate()
   print m.input_latches
 
   time.sleep(0.1)
