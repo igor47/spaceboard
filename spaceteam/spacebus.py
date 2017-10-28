@@ -9,7 +9,7 @@ threads by only one peripheral at at time
 import smbus
 
 from contextlib import contextmanager
-from threading import Lock
+from threading import RLock
 import time
 
 from errors import SMBUSTimeout
@@ -26,7 +26,7 @@ class Spacebus(object):
 
   def __init__(self):
     self.bus = smbus.SMBus(BUS_ID)
-    self.lock = Lock()
+    self.lock = RLock()
 
   def all_call_reset(self):
     with self.lock_grabber():
