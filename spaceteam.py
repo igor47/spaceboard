@@ -2,50 +2,73 @@
 
 import spaceteam
 from spaceteam import Client
+from spaceteam import PeripheralReader
+
+from spaceteam import state
+
+import time
 
 SERVER_IP = '10.110.0.1'
 
-def main(args):
-  # initialize client connection
-  client = Client()
-  client.connect(SERVER_IP)
+def comms(client, prev_state, new_state):
+  diffs = {}
+  for k in prev_state:
+    if prev_state[k] != new_state[k]:
+      diffs[k] = new_state[k]
 
+  if diffs:
+    print "diffs: %s" % diffs
+
+  if not client:
+    return
+
+  # send any state updates
+  # TODO: we should determine how the state has changed, or else send the whole thing
+  client.send('announce', new_state)
+
+  # recieve any instructions from the network
+  message = client.read()
+  if message is None:
+    return
+
+  # act on any messages recieved
+  if message['message'] == 'reset':
+    pass
+
+  if message['message'] == 'display':
+    # TODO: we should display on some sort of peripheral
+    print "we got a message from the server! %s" % message['data']
+
+def main(args):
   # load and initialize our peripherals
   from spaceteam import peripherals
   peripherals.reset_all()
 
   # begin looping over them, reading their state
-  from spaceteam import peripheral_reader
-  peripheral_reader.begin_reading(peripherals.ALL)
+  try:
+    PeripheralReader.begin_reading(peripherals.ALL)
+    time.sleep(1) # give some reader loops
 
-  # initialize local state
-  from spaceteam import state
-  prev_state = state.generate()
+    # initialize local state
+    prev_state = state.generate()
 
-  # announce ourselves to the server
-  client.send('announce', prev_state)
+    # initialize client connection
+    if '--local' in args:
+      print "Acting in local mode!"
+      client = None
+    else:
+      client = Client()
+      client.connect(SERVER_IP)
+      client.send('announce', prev_state)
 
-  # loop, generating new state each time
-  while True:
-    new_state = state.generate()
+    # loop, generating new state each time
+    while True:
+      new_state = state.generate()
+      comms(client, prev_state, new_state)
+      prev_state = new_state
 
-    # send any state updates
-    # TODO: we should determine how the state has changed, or else send the whole thing
-    client.send('announce', new_state)
-    prev_state = new_state
-
-    # recieve any instructions from the network
-    message = client.read()
-    if message is None:
-      continue
-
-    # act on any messages recieved
-    if message['message'] == 'reset':
-      pass
-
-    if message['message'] == 'display':
-      # TODO: we should display on some sort of peripheral
-      print "we got a message from the server! %s" % message['data']
+  finally:
+    PeripheralReader.stop_reading()
 
 # run spaceteam!
 import sys
