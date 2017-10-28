@@ -142,7 +142,7 @@ class MCP23017(object):
     with self.smbus.lock_grabber():
       for port in [GPIOA_ADDR, GPIOB_ADDR]:
         data = self.smbus.read_byte_data(self.address, port)
-        port_bits = list(format(data, "08b"))
+        port_bits = [x == '1' for x in format(data, "08b")]
         bits += port_bits
 
     # now bits contains 0s and 1s for each input, but we
