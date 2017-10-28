@@ -51,6 +51,9 @@ class Microcontroller(object):
     # max brightness for the leds
     self.max_brightness = 180
 
+    # do we need to latch the leds?
+    self.leds_updated = False
+
   def stop(self):
     """Shuts down communication to the microcontroller."""
     self._serial.close()
@@ -153,23 +156,30 @@ class Microcontroller(object):
     """Resets the device"""
     self._send_command('R')
 
+  def communicate(self):
+    """Performs two-ways comms with peripheral
+
+    In our case, this means syncing the local LED state with the remote LED state"""
+    if self.leds_updated:
+      self.latch_leds()
+
   def clear_leds(self):
     """Clears (turns off) all of the leds"""
     self._send_command('C')
 
   def latch_leds(self):
     """Displays the led values we've sent on the strip"""
+    self.leds_updated = False
     self._send_command('L')
 
-  def set_led(self, number, color, latch = True):
+  def set_led(self, number, color, latch = False):
     """Sets as specific led to the given color; color is a Colour instance"""
     command = ["O", number] + self.color_to_bit_list(color)
     self._send_command(command)
 
-    if latch:
-      self.latch_leds()
+    self.latch_now_or_later(latch)
 
-  def set_led_batch(self, first_led, colors = [], latch = True):
+  def set_led_batch(self, first_led, colors = [], latch = False):
     """Sets all specified colors"""
     group_size = 10 # we will set up to 10 leds at once
 
@@ -184,8 +194,13 @@ class Microcontroller(object):
       first_led += group_size
       colors = colors[group_size:]
 
+    self.latch_now_or_later(latch)
+
+  def latch_now_or_later(self, latch):
     if latch:
       self.latch_leds()
+    else:
+      self.leds_updated = True
 
   def color_to_bit_list(self, color):
     """converts a color into a list of rgb uint8_ts based on max_brightness"""
