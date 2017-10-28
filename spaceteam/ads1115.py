@@ -40,16 +40,28 @@ class ADS1115(object):
     self.pins_enabled = [False] * 4
     self.pin_values = [None] * 4
 
-  def read_inputs(self):
+    self.last_pin_enabled = None
+
+  def communicate(self):
+    """Reads the state of all enabled pins and saves it locally"""
+    self._read_inputs()
+
+  def _read_inputs(self):
     """reads all enabled pins and stores the values locally"""
     for pin, is_enabled in enumerate(self.pins_enabled):
-      self.write_config(pin)
+      if not is_enabled:
+        continue
 
-      # give the device time to read the given input
-      time.sleep(1.0 / self.samples_per_second)
+      if pin != self.last_pin_enabled:
+        self._write_config(pin)
+        # give the device time to read the given input
+        time.sleep(1.0 / self.samples_per_second)
+
+        # save the pin we used
+        self.last_pin_enabled = pin
 
       # store the (raw) value into the local register
-      with self.smbus_lock_grabber():
+      with self.smbus.lock_grabber():
         self.pin_values[pin] = self._read_value()
 
   def read(self, pin, scaled = False):
@@ -108,7 +120,7 @@ class ADS1115(object):
   def _read_value(self):
     """reads the raw value of the conversion register"""
     # perform the read via smbus
-    with self.smbus_lock_grabber():
+    with self.smbus.lock_grabber():
       data = self.smbus.read_word_data(self.address, CONVERSION_REGISTER)
 
     # linux expects to read LSB first; lets re-arrange the bytes we just got
@@ -118,4 +130,3 @@ class ADS1115(object):
     value = data_msb + data_lsb
 
     return value
-

@@ -5,6 +5,7 @@ The collection of our various types of controls
 
 import peripherals
 from colour import Color
+import time
 
 class Switch(object):
   def __init__(self, device, pin):
@@ -13,6 +14,11 @@ class Switch(object):
 
     self.prev_value = None
     self.value = None
+
+  def active(self):
+    """is the switch currently switched?"""
+    # invert -- we use pull-up resistors, so an ON switch is low
+    return not self.value
 
   def read(self):
     self.prev_value = self.value
@@ -30,16 +36,17 @@ class SwitchWithLight(Switch):
     Switch.__init__(self, device, pin)
 
     self.led_id = led_id
-    self.last_color = None
+    self.prev_color = None
 
   def after_read(self):
+    Switch.after_read(self)
     self.set_color()
 
   def set_color(self):
-    color = self.ACTIVE_COLOR if self.value else self.INACTIVE_COLOR
-    if self.prev_color != color:
-      peripherals.MAPLE.set_led(self.led_id, new_color)
-      self.prev_color = color
+    new_color = self.ACTIVE_COLOR if self.active() else self.INACTIVE_COLOR
+    if self.prev_color != new_color:
+      peripherals.MAPLE.set_led(self.led_id, new_color, latch = False)
+      self.prev_color = new_color
 
 class SwitchWithTwoLights(Switch):
   UP_ON_COLOR = Color("green")
@@ -57,8 +64,8 @@ class SwitchWithTwoLights(Switch):
     if self.prev_value == self.value:
       return
 
-    up_color = UP_ON_COLOR if self.value else UP_OFF_COLOR
-    down_color = DOWN_OFF_COLOR if self.value else DOWN_ON_COLOR
+    up_color = self.UP_ON_COLOR if self.value else self.UP_OFF_COLOR
+    down_color = self.DOWN_OFF_COLOR if self.value else self.DOWN_ON_COLOR
 
     peripherals.MAPLE.set_led(self.led_up_id, up_color)
     peripherals.MAPLE.set_led(self.led_down_id, down_color)
@@ -68,29 +75,29 @@ class KeypadButton(SwitchWithLight):
 
   def __init__(self, device, pin, led_id):
     SwitchWithLight.__init__(self, device, pin, led_id)
-    self.callback = lambda: None
+    self.callback = lambda btn: None
 
   def after_read(self):
     SwitchWithLight.after_read(self)
     if self.prev_value != self.value:
-      self.callback()
+      self.callback(self)
 
 class Keypad(object):
   """A keypad; this is pretty specific to my board"""
   REQUIRED_KEYS = set([0,1,2,3,4,5,6,7,8,9,'input','ok'])
 
   ACTIVE_COLOR = Color("green")
-  INACTIVE_COLOR = Color("lime")
+  INACTIVE_COLOR = Color("green", saturation = 0.5)
 
   DISABLED_COLOR = Color("orange")
-  DISABLED_ACTIVE_COLOR = Color("orange")
+  DISABLED_ACTIVE_COLOR = Color("red")
 
   BLINK_COLOR = Color("blue")
   BLINK_INTERVAL_SEC = 0.5
 
   def __init__(self, buttons):
     # did we get the buttons we require?
-    provided = set(buttons.keys)
+    provided = set(buttons.keys())
     if provided != self.REQUIRED_KEYS:
       raise RuntimeError(
           "Keypad requires a dictionary of buttons with exactly keys %s, but %s was provided" % (
@@ -99,7 +106,7 @@ class Keypad(object):
     # save and initialize callbacks on key press
     self.buttons = buttons
     for label in self.buttons:
-      self.buttons[label].callback = self.callback_for(btn)
+      self.buttons[label].callback = self.callback_for(label)
 
     # internal state
     self.next_blink = 0
@@ -114,14 +121,18 @@ class Keypad(object):
     self.value = list(self.display)
 
   def callback_for(self, label):
-    return lambda: self.key_pressed(label)
+    return lambda btn: self.key_pressed(label, btn)
 
-  def key_pressed(self, label):
-    if label == 'input'
+  def key_pressed(self, label, btn):
+    # we only care about key press, not key release
+    if not btn.active():
+      return
+
+    if label == 'input':
       if not self.input_mode:
         self.input_mode = True
 
-    elif label == 'ok'
+    elif label == 'ok':
       if self.input_mode:
         self.input_mode = False
         self.value = list(self.display)
@@ -129,6 +140,7 @@ class Keypad(object):
     else:
       if self.input_mode:
         self.display = self.display[1:] + [label]
+        print self.display
 
   def set_button_colors(self):
     """sets the colors for all the keys based on the current mode"""
@@ -167,7 +179,7 @@ class Keypad(object):
         self.buttons['input'].INACTIVE_COLOR = self.INACTIVE_COLOR
 
     # now we need to iterate through the number keys and set them
-    for key in xrange(0, 9):
+    for key in xrange(0, 10):
       btn = self.buttons[key]
       btn.ACTIVE_COLOR = number_active_color
       btn.INACTIVE_COLOR = number_inactive_color
@@ -175,15 +187,15 @@ class Keypad(object):
   def read(self):
     # handle blinking
     now = time.time()
-    if now > next_blink:
-      next_blink = now + self.BLINK_INTERVAL
+    if now > self.next_blink:
+      self.next_blink = now + self.BLINK_INTERVAL_SEC
       self.blink_on_mode = not self.blink_on_mode
 
     # set the button colors based on the current mode
     self.set_button_colors()
 
     # now lets read the inputs; that will set colors if necessary
-    for btn in self.buttons:
+    for btn in self.buttons.values():
       btn.read()
 
 class Analog(object):
@@ -195,8 +207,8 @@ class Analog(object):
     self.pin = pin
 
     # initialize hysterisis
-    self.prev_value = None
-    self.value = None
+    self.prev_value = 500
+    self.value = 500
 
     # enable reading that pin
     self.device.enable_pin(pin)
@@ -209,7 +221,7 @@ class Analog(object):
     change = abs(1 - self.value/cur_value)
     if change > self.CHANGE_THRESHOLD:
       self.prev_value = self.value
-      self.value = self.cur_value
+      self.value = cur_value
 
     self.after_read()
 
@@ -218,6 +230,8 @@ class Analog(object):
 
 class Accelerator(Analog):
   """A potentiometer with LEDs indicating the position"""
+  RANGE = 52  # how high does it get?
+
   def __init__(self, device, pin, first_led_id, led_count):
     Analog.__init__(self, device, pin)
     self.first_led_id = first_led_id
@@ -239,15 +253,14 @@ class Accelerator(Analog):
     if self.value == self.prev_value:
       pass
 
-    pct = float(self.value) / 100
+    pct = float(self.value) / self.RANGE
     last_led_on = int(pct * self.led_count)
 
     color_range_idx = int(pct * len(self.color_range))
     on_color = self.color_range[color_range_idx]
 
-    new_colors = \
-        [on_color] * last_led_on \                          # the leds that are on
-        + [Color("black")] * (self.led_count - last_led_on) # leds that are off
+    new_colors = [on_color] * last_led_on     # these leds are on
+    new_colors += [Color("black")] * (self.led_count - last_led_on) # these are off
 
     peripherals.MAPLE.set_led_batch(self.first_led_id, new_colors)
 

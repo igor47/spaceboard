@@ -49,4 +49,5 @@ class PeripheralReader(threading.Thread):
 
       runtime_ms = (end - start) * 1000
       if runtime_ms > self.DEADLINE_MS:
-        print "We took {0:0.3f} millis to read inputs".format(runtime_ms)
+        #print "We took {0:0.3f} millis to read inputs".format(runtime_ms)
+        pass
