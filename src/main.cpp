@@ -63,7 +63,7 @@ void setup()
   // NOTE: DO NOT REMOVE ABOVE LINE
 
   // allows a quick visual check that all the leds work/a reset just happened
-  colorWipe(strip.Color(10, 10, 10), 100);
+  colorWipe(strip.Color(10, 10, 10), 5);
   clearStrip();
 
   Serial.print("boot!\n");

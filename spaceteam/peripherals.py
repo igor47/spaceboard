@@ -35,6 +35,13 @@ ALL = [
 
 def reset_all():
   """resets all peripherals"""
+  # reset any microcontrollers
+  micros = [p for p in ALL if type(p) == Microcontroller]
+  for micro in micros:
+    micro.reset()
+    time.sleep(3)
+    print micro.get_state()
+
   # re-initalize any mcp port expanders
   mcps = [p for p in ALL if type(p) == MCP23017]
   if len(mcps) > 0:
@@ -58,7 +65,3 @@ def reset_all():
     for adc in adcs:
       adc.reset()
 
-  # reset any microcontrollers
-  micros = [p for p in ALL if type(p) == Microcontroller]
-  for micro in micros:
-    micro.reset()
