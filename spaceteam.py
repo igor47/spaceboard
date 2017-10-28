@@ -20,6 +20,7 @@ def comms(client, prev_state, new_state):
     print "diffs: %s" % diffs
 
   if not client:
+    time.sleep(0.01)
     return
 
   # send any state updates
