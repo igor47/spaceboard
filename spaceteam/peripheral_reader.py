@@ -27,7 +27,7 @@ class PeripheralReader(threading.Thread):
 
   # private stuff
   __READER = None
-  DEADLINE_SEC = 0.03  # we should read the peripherals this often
+  DEADLINE_MS = 30  # we should read the peripherals this often
 
   def __init__(self, prps = []):
     threading.Thread.__init__(self, name = 'peripheral_reader')
@@ -42,10 +42,11 @@ class PeripheralReader(threading.Thread):
 
   def run(self):
     while not self._stop.isSet():
-      deadline = time.time() + self.DEADLINE_SEC
+      start = time.time()
       for p in self.peripherals:
         p.communicate()
+      end = time.time()
 
-      overrun_ms = (time.time() - deadline) * 1000
-      if overrun_ms > 0:
-        print "We took {0:0.3f} millis over deadline to read inputs".format(overrun_ms)
+      runtime_ms = (end - start) * 1000
+      if runtime_ms > self.DEADLINE_MS:
+        print "We took {0:0.3f} millis to read inputs".format(runtime_ms)
