@@ -30,7 +30,7 @@ ALL = [
     MAPLE,
     MCP26,
     MCP27,
-    #ANALOG1,
+    ANALOG1,
     ]
 
 def reset_all():
@@ -39,8 +39,15 @@ def reset_all():
   micros = [p for p in ALL if type(p) == Microcontroller]
   for micro in micros:
     micro.reset()
-    time.sleep(3)
-    print micro.get_state()
+    tries = 0
+    while tries < 3:
+      time.sleep(0.1)
+      try:
+        micro.get_state()
+      except:
+        tries += 1
+      else:
+        break
 
   # re-initalize any mcp port expanders
   mcps = [p for p in ALL if type(p) == MCP23017]
