@@ -60,15 +60,23 @@ class SwitchWithTwoLights(Switch):
     self.led_up_id = led_up_id
     self.led_down_id = led_down_id
 
+    self.prev_up_color = None
+    self.prev_down_color = None
+
   def after_read(self):
-    if self.prev_value == self.value:
-      return
+    Switch.after_read(self)
+    self.set_color()
 
-    up_color = self.UP_ON_COLOR if self.value else self.UP_OFF_COLOR
-    down_color = self.DOWN_OFF_COLOR if self.value else self.DOWN_ON_COLOR
+  def set_color(self):
+    up_color = self.UP_ON_COLOR if self.active() else self.UP_OFF_COLOR
+    if up_color != self.prev_up_color:
+      self.prev_up_color = up_color
+      peripherals.MAPLE.set_led(self.led_up_id, up_color)
 
-    peripherals.MAPLE.set_led(self.led_up_id, up_color)
-    peripherals.MAPLE.set_led(self.led_down_id, down_color)
+    down_color = self.DOWN_OFF_COLOR if self.active() else self.DOWN_ON_COLOR
+    if down_color != self.prev_down_color:
+      self.prev_down_color = down_color
+      peripherals.MAPLE.set_led(self.led_down_id, down_color)
 
 class KeypadButton(SwitchWithLight):
   """Just like a switch with a light, but calls a callback on press"""
@@ -140,7 +148,6 @@ class Keypad(object):
     else:
       if self.input_mode:
         self.display = self.display[1:] + [label]
-        print self.display
 
   def set_button_colors(self):
     """sets the colors for all the keys based on the current mode"""

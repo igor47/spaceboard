@@ -5,7 +5,7 @@ peripherals.reset_all()
 
 import time
 
-m = peripherals.MCP27
+m = peripherals.MCP26
 while True:
   m.communicate()
   print m.input_latches

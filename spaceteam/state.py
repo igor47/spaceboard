@@ -12,19 +12,61 @@ INPUTS = {
       pin = 11,
       led_id = 1,
       ),
-    "red_toggle_1": Switch(
+    "silver_toggle_top_1": SwitchWithTwoLights(
       device = MCP26,
-      pin = 1,
+      pin = 10,
+      led_up_id = 5,
+      led_down_id = 6,
       ),
-    "red_toggle_2": Switch(
+    "silver_toggle_top_2": SwitchWithTwoLights(
       device = MCP26,
-      pin = 2,
-      ),
-    "blue_toggle_1": SwitchWithTwoLights(
-      device = MCP26,
-      pin = 3,
-      led_up_id = 6,
+      pin = 12,
+      led_up_id = 4,
       led_down_id = 7,
+      ),
+    "silver_toggle_top_3": SwitchWithTwoLights(
+      device = MCP26,
+      pin = 13,
+      led_up_id = 3,
+      led_down_id = 8,
+      ),
+    "silver_toggle_top_4": SwitchWithTwoLights(
+      device = MCP26,
+      pin = 11,
+      led_up_id = 2,
+      led_down_id = 9,
+      ),
+    "silver_toggle_bottom_1": SwitchWithTwoLights(
+      device = MCP26,
+      pin = 9,
+      led_up_id = 13,
+      led_down_id = 14,
+      ),
+    "silver_toggle_bottom_2": SwitchWithTwoLights(
+      device = MCP27,
+      pin = 8,
+      led_up_id = 12,
+      led_down_id = 15,
+      ),
+    "silver_toggle_bottom_3": SwitchWithTwoLights(
+      device = MCP26,
+      pin = 8,
+      led_up_id = 11,
+      led_down_id = 16,
+      ),
+    "silver_toggle_bottom_4": SwitchWithTwoLights(
+      device = MCP26,
+      pin = 14,
+      led_up_id = 10,
+      led_down_id = 17,
+      ),
+    "little_red_push": Switch(
+      device = MCP27,
+      pin = 9,
+      ),
+    "little_green_push": Switch(
+      device = MCP27,
+      pin = 10,
       ),
     "Keypad": Keypad({
       1: KeypadButton(MCP27, pin = 15, led_id = 18),
