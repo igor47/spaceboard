@@ -55,16 +55,6 @@ else
   fi
 fi
 
-# do we have pigpio available?
-if [[ `systemctl status pigpiod` ]]
-then
-  echo "pigpiod is already running..."
-else
-  aptitude install -y pigpio python-pigpio
-  systemctl enable pigpiod
-  systemctl start pigpiod
-fi
-
 # disable bluetooth
 if [[ $(grep 'dtoverlay=pi3-disable-bt' /boot/config.txt) ]]; then
   echo 'bluetooth already disabled'
@@ -99,3 +89,7 @@ pip install colour
 
 # we use cobs to talk to the microcontroller
 pip install cobs
+
+# luma.oled is for talking to the little display
+aptitude install libjpeg9 libjpeg9-dev
+pip install luma.oled

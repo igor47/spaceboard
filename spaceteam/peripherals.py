@@ -26,7 +26,11 @@ from mcp23017 import MCP23017
 MCP26 = MCP23017(_SMBUS, 0x26)
 MCP27 = MCP23017(_SMBUS, 0x27)
 
+from ssd1306 import SSD1306
+DISPLAY = SSD1306(_SMBUS)
+
 ALL = [
+    DISPLAY,
     MAPLE,
     MCP26,
     MCP27,
@@ -72,3 +76,7 @@ def reset_all():
     for adc in adcs:
       adc.reset()
 
+  # reset any displays
+  displays = [p for p in ALL if type(p) == SSD1306]
+  for display in displays:
+    display.reset()
