@@ -7,6 +7,7 @@ from spaceteam import PeripheralReader
 from spaceteam import state
 
 import time
+import sdnotify
 
 SERVER_IP = '10.110.0.1'
 
@@ -31,10 +32,6 @@ def comms(client, prev_state, new_state):
   message = client.read()
   if message is None:
     return
-
-  # act on any messages recieved
-  if message['message'] == 'reset':
-    pass
 
   if message['message'] == 'display':
     # TODO: we should display on some sort of peripheral
@@ -62,13 +59,22 @@ def main(args):
       client.connect(SERVER_IP)
       client.send('announce', prev_state)
 
+    # initialize systemd notifications
+    notifier = sdnotify.SystemdNotifier()
+    notifier.notify("READY=1")
+
     # loop, generating new state each time
     while True:
       new_state = state.generate()
       comms(client, prev_state, new_state)
       prev_state = new_state
 
+      notifier.notify("WATCHDOG=1")
+
   finally:
+    if client:
+      client.stop()
+
     PeripheralReader.stop_reading()
 
 # run spaceteam!

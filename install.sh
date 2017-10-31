@@ -93,3 +93,6 @@ pip install cobs
 # luma.oled is for talking to the little display
 aptitude install libjpeg9 libjpeg9-dev
 pip install luma.oled
+
+# sdnotify is for systemd comms
+pip install sdnotify
