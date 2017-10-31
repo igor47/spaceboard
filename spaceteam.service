@@ -1,20 +1,26 @@
-[Unit]
-Description=Spaceteam: the software that reads the controls
-
 [Service]
-# Note: setting PYTHONUNBUFFERED is necessary to see the output of this service in the journal
-# See https://docs.python.org/2/using/cmdline.html#envvar-PYTHONUNBUFFERED
-Environment=PYTHONUNBUFFERED=true
-
-# Adjust this line to the correct path to test.py
+# you will probably need to modify this one
+WorkingDirectory=/home/pi/spaceboard
 ExecStart=/home/pi/spaceboard/spaceteam.py --local
 
-# Note that we use Type=notify here since test.py will send "READY=1"
-# when it's finished starting up
 Type=notify
+
+# necessary to see the output of this service in the journal
+Environment=PYTHONUNBUFFERED=true
 
 # our program must notify systemd or it will be considered failed
 WatchdogSec=10
 
 # we will restart no matter what happens
 Restart=always
+
+User=pi
+Group=pi
+
+[Unit]
+Description=Spaceteam: the software that reads the controls
+Wants=network-online.target
+After=network-online.target
+
+[Install]
+WantedBy=multi-user.target

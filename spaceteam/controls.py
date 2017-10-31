@@ -247,21 +247,22 @@ class Accelerator(Analog):
     # configure the colors
     self.black = Color("black")
     self.color_range = [
-        Color(rgb = (0, 0.02, 0),
-        Color(rgb = (0, 0.05, 0),
-        Color(rgb = (0, 0.08, 0),
-        Color(rgb = (0, 0.12, 0),
-        Color(rgb = (0, 0.20, 0.01),
-        Color(rgb = (0, 0.35, 0.05),
-        Color(rgb = (0, 0.50, 0.10),
-        Color(rgb = (0, 0.55, 0.15),
-        Color(rgb = (0, 0.65, 0.20),
-        Color(rgb = (0.05, 0.55, 0.20),
-        Color(rgb = (0.10, 0.50, 0.15),
-        Color(rgb = (0.15, 0.45, 0.10),
-        Color(rgb = (0.25, 0.40, 0.05),
-        Color(rgb = (0.35, 0.40, 0.02),
-        Color(rgb = (0.50, 0.40, 0.01),
+        Color(rgb = (0, 0.02, 0)),
+        Color(rgb = (0, 0.05, 0)),
+        Color(rgb = (0, 0.08, 0)),
+        Color(rgb = (0, 0.12, 0)),
+        Color(rgb = (0, 0.20, 0.01)),
+        Color(rgb = (0, 0.35, 0.05)),
+        Color(rgb = (0, 0.50, 0.10)),
+        Color(rgb = (0, 0.55, 0.15)),
+        Color(rgb = (0, 0.65, 0.20)),
+        Color(rgb = (0.05, 0.55, 0.20)),
+        Color(rgb = (0.10, 0.50, 0.15)),
+        Color(rgb = (0.15, 0.45, 0.10)),
+        Color(rgb = (0.25, 0.40, 0.05)),
+        Color(rgb = (0.35, 0.40, 0.02)),
+        Color(rgb = (0.50, 0.40, 0.01)),
+        Color(rgb = (0.60, 0.35, 0)),
       ]
 
   def after_read(self):
@@ -276,13 +277,13 @@ class Accelerator(Analog):
     pct = float(self.value) / self.RANGE
     last_led_on = int(pct * self.led_count)
 
-    color_range_idx = int(pct * len(self.color_range))
+    color_range_idx = int(pct * (len(self.color_range) - 1))
     on_color = self.color_range[color_range_idx]
 
     new_colors = [on_color] * last_led_on     # these leds are on
     new_colors += [self.black] * (self.led_count - last_led_on) # these are off
 
-    peripherals.MAPLE.set_led_batch(self.first_led_id, reversed(new_colors))
+    peripherals.MAPLE.set_led_batch(self.first_led_id, new_colors[::-1])
 
 class RotaryEncoder(object):
   """A rotary encoder!"""

@@ -43,6 +43,7 @@ def main(args):
   peripherals.reset_all()
 
   # begin looping over them, reading their state
+  client = None
   try:
     PeripheralReader.begin_reading(peripherals.ALL)
     time.sleep(1) # give some reader loops
@@ -53,7 +54,6 @@ def main(args):
     # initialize client connection
     if '--local' in args:
       print "Acting in local mode!"
-      client = None
     else:
       client = Client()
       client.connect(SERVER_IP)
