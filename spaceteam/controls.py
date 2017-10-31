@@ -237,7 +237,7 @@ class Analog(object):
 
 class Accelerator(Analog):
   """A potentiometer with LEDs indicating the position"""
-  RANGE = 52  # how high does it get?
+  RANGE = 50  # how high does it get?
 
   def __init__(self, device, pin, first_led_id, led_count):
     Analog.__init__(self, device, pin)
@@ -245,11 +245,24 @@ class Accelerator(Analog):
     self.led_count = led_count
 
     # configure the colors
-    starting_color = Color("blue")
-    starting_color.set_luminance(0.1)
-    ending_color = Color("orange")
-    ending_color.set_luminance(0.8)
-    self.color_range = list(starting_color.range_to(ending_color, 41))
+    self.black = Color("black")
+    self.color_range = [
+        Color(rgb = (0, 0.02, 0),
+        Color(rgb = (0, 0.05, 0),
+        Color(rgb = (0, 0.08, 0),
+        Color(rgb = (0, 0.12, 0),
+        Color(rgb = (0, 0.20, 0.01),
+        Color(rgb = (0, 0.35, 0.05),
+        Color(rgb = (0, 0.50, 0.10),
+        Color(rgb = (0, 0.55, 0.15),
+        Color(rgb = (0, 0.65, 0.20),
+        Color(rgb = (0.05, 0.55, 0.20),
+        Color(rgb = (0.10, 0.50, 0.15),
+        Color(rgb = (0.15, 0.45, 0.10),
+        Color(rgb = (0.25, 0.40, 0.05),
+        Color(rgb = (0.35, 0.40, 0.02),
+        Color(rgb = (0.50, 0.40, 0.01),
+      ]
 
   def after_read(self):
     self.set_leds()
@@ -267,9 +280,9 @@ class Accelerator(Analog):
     on_color = self.color_range[color_range_idx]
 
     new_colors = [on_color] * last_led_on     # these leds are on
-    new_colors += [Color("black")] * (self.led_count - last_led_on) # these are off
+    new_colors += [self.black] * (self.led_count - last_led_on) # these are off
 
-    peripherals.MAPLE.set_led_batch(self.first_led_id, new_colors)
+    peripherals.MAPLE.set_led_batch(self.first_led_id, reversed(new_colors))
 
 class RotaryEncoder(object):
   """A rotary encoder!"""
