@@ -13,8 +13,11 @@ class SSD1306(object):
     self.smbus = smbus
     self.device = ssd1306(bus = self.smbus, address = address)
 
-    self.prev_text = None
-    self.text = "Welcome!"
+    self.prev_message = None
+    self.message = "Initializing flight control..."
+
+    self.prev_status = None
+    self.status = 0
 
     self.font = self.get_font(self.FONT, self.FONT_SIZE)
 
@@ -29,19 +32,29 @@ class SSD1306(object):
       self.device.show()
 
   def communicate(self):
-    if self.prev_text != self.text:
-      self.write_text()
+    if self.prev_message != self.message or self.prev_status != self.status:
+      self._write()
 
-  def write_text(self):
-    # write whatever text is at the beginning of the function
-    # if it changes while this is running, we'll do another write
-    to_write = self.text
-
-    # do the writing
+  def _write(self):
     with self.smbus.lock_grabber():
       with canvas(self.device) as draw:
         draw.rectangle(self.device.bounding_box, outline="white", fill="black")
-        draw.text((10, 40), to_write, fill="white", font = self.font)
 
-        # save what we wrote
-        self.prev_text = to_write
+        # we've cleared the screen, now we write whatever is in our buffers
+
+        # first, write the message (it goes on top)
+        msg = self.message
+        draw.text((10, 80), msg, fill="white", font = self.font)
+        self.prev_message = msg
+
+        # now, write the status
+        try:
+          stat = int(self.status)
+        except ValueError:
+          draw.text((10, 40), stat, fill="white", font = self.font)
+        else:
+          width = stat / (self.device.width - 20)
+          box = (10, 40, 10 + width, 50)
+          draw.rectangle(box, outline="white", fill="white")
+
+        self.prev_status = stat

@@ -17,25 +17,35 @@ def comms(client, prev_state, new_state):
     if prev_state[k] != new_state[k]:
       diffs[k] = new_state[k]
 
-  if diffs:
-    print "diffs: %s" % diffs
-
   if not client:
+    if diffs:
+      print "diffs: %s" % diffs
     time.sleep(0.01)
     return
 
-  # send any state updates
-  # TODO: we should determine how the state has changed, or else send the whole thing
-  client.send('announce', new_state)
+  # send any changes in our local state
+  for diff in diffs:
+    client.send('set-state', {'id': diff, 'state': diffs[diff]})
 
   # recieve any instructions from the network
-  message = client.read()
-  if message is None:
-    return
+  message = None
+  status = None
 
-  if message['message'] == 'display':
-    # TODO: we should display on some sort of peripheral
-    print "we got a message from the server! %s" % message['data']
+  from_server = client.read()
+  while from_server is not None:
+    if from_server['message'] == 'set-display':
+      message = from_server['data']['message']
+      print "set display to %s" % message
+
+    if message['message'] == 'set-status':
+      try:
+        status = message['data']['message']
+      except KeyError:
+        status = int(message['data']['progress'])
+
+      print "set status to %s" % status
+
+  return (message, status)
 
 def main(args):
   # load and initialize our peripherals
@@ -66,7 +76,7 @@ def main(args):
     # loop, generating new state each time
     while True:
       new_state = state.generate()
-      comms(client, prev_state, new_state)
+      message, status = comms(client, prev_state, new_state)
       prev_state = new_state
 
       notifier.notify("WATCHDOG=1")
