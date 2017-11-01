@@ -206,7 +206,7 @@ class Keypad(object):
       btn.read()
 
 class Analog(object):
-  CHANGE_THRESHOLD = 0.05
+  CHANGE_THRESHOLD = 2
 
   """An analog input (potentiometer)"""
   def __init__(self, device, pin):
@@ -222,11 +222,10 @@ class Analog(object):
 
   def read(self):
     cur_value = int(self.device.read(self.pin, scaled = True))
-    cur_value = 1 if cur_value == 0 else cur_value
 
     # we only save the new value if it's changed more than threshold
     # this prevents oscillating due to analog jitter
-    change = abs(1 - self.value/cur_value)
+    change = abs(cur_value - self.value)
     if change > self.CHANGE_THRESHOLD:
       self.prev_value = self.value
       self.value = cur_value
@@ -236,12 +235,16 @@ class Analog(object):
   def after_read(self):
     pass
 
-class Accelerator(Analog):
+class Accelerator(object):
   """A potentiometer with LEDs indicating the position"""
   RANGE = 50  # how high does it get?
 
   def __init__(self, device, pin, first_led_id, led_count):
-    Analog.__init__(self, device, pin)
+    self.sensor = Analog(device, pin)
+
+    self.value = None
+    self.prev_value = None
+
     self.first_led_id = first_led_id
     self.led_count = led_count
 
@@ -249,40 +252,44 @@ class Accelerator(Analog):
     self.black = Color("black")
     self.color_range = [
         Color(rgb = (0, 0.02, 0)),
-        Color(rgb = (0, 0.05, 0)),
-        Color(rgb = (0, 0.08, 0)),
-        Color(rgb = (0, 0.12, 0)),
-        Color(rgb = (0, 0.20, 0.01)),
-        Color(rgb = (0, 0.35, 0.05)),
-        Color(rgb = (0, 0.50, 0.10)),
-        Color(rgb = (0, 0.55, 0.15)),
-        Color(rgb = (0, 0.65, 0.20)),
-        Color(rgb = (0.05, 0.55, 0.20)),
-        Color(rgb = (0.10, 0.50, 0.15)),
-        Color(rgb = (0.15, 0.45, 0.10)),
-        Color(rgb = (0.25, 0.40, 0.05)),
-        Color(rgb = (0.35, 0.40, 0.02)),
-        Color(rgb = (0.50, 0.40, 0.01)),
-        Color(rgb = (0.60, 0.35, 0)),
+        Color(rgb = (0, 0.10, 0)),
+        Color(rgb = (0, 0.15, 0)),
+        Color(rgb = (0, 0.20, 0)),
+        Color(rgb = (0, 0.35, 0)),
+
+        Color(rgb = (0, 0.40, 0.05)),
+        Color(rgb = (0, 0.55, 0.10)),
+        Color(rgb = (0, 0.65, 0.15)),
+        Color(rgb = (0, 0.70, 0.25)),
+        Color(rgb = (0, 0.75, 0.30)),
+
+        Color(rgb = (0.10, 0.60, 0.20)),
+        Color(rgb = (0.25, 0.50, 0.10)),
+        Color(rgb = (0.40, 0.40, 0.05)),
+        Color(rgb = (0.60, 0.30, 0)),
+        Color(rgb = (0.70, 0.20, 0)),
+
+        Color(rgb = (0.80, 0.10, 0)),
+        Color(rgb = (0.90, 0.05, 0)),
       ]
 
-  def after_read(self):
+  def read(self):
+    self.sensor.read()
+    pct = float(self.sensor.value) / self.RANGE
+
+    self.prev_value = self.value
+    self.value = int(self.led_count * pct)
     self.set_leds()
 
   def set_leds(self):
     """loads the attached led string with the correct colors"""
-    # no nothing if the position hasn't changed
     if self.value == self.prev_value:
       pass
 
-    pct = float(self.value) / self.RANGE
-    last_led_on = int(pct * self.led_count)
+    cur_color = self.color_range[self.value]
 
-    color_range_idx = int(pct * (len(self.color_range) - 1))
-    on_color = self.color_range[color_range_idx]
-
-    new_colors = [on_color] * last_led_on     # these leds are on
-    new_colors += [self.black] * (self.led_count - last_led_on) # these are off
+    new_colors = [cur_color] * self.value     # these leds are on
+    new_colors += [self.black] * (self.led_count - self.value) # these are off
 
     peripherals.MAPLE.set_led_batch(self.first_led_id, new_colors[::-1])
 

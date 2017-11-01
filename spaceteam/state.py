@@ -152,7 +152,7 @@ INPUTS = [
        first_led_id = 30,
        led_count = 15,
      ),
-    'actions': {str(n): "Set the accelerator to %d!" % n for n in xrange(50)}
+    'actions': {str(n): "Set throttle to %d!" % n for n in xrange(15)}
   }
 ]
 
