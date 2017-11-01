@@ -6,25 +6,56 @@ Acts as a client to a central control server
 import json
 import socket
 import struct
+import threading
+import time
+import Queue
 
 DEFAULT_PORT = 8000
 
 class Client:
   """Handles communication with the server and polling state updates."""
 
-  def __init__(self):
+  def __init__(self, host, port = DEFAULT_PORT):
     """initialize comms"""
     self._socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    self.read_buffer = ""
+    self.host = host
+    self.port = port
 
-  def connect(self, host, port = DEFAULT_PORT):
-    self._socket.connect((host, port))
+    self.read_buffer = ''
+
+    self.recv_thread = None
+    self.recv_stop = threading.Event()
+    self.recv_events = Queue.Queue()
+
+  def start(self, announce):
+    self._socket.connect((self.host, self.port))
+    self._send('announce', announce)
+
+    # don't do this until after we send an announcement
+    # otherwise we sometimes fail to send all of the data
     self._socket.setblocking(0)
 
+    # start the reader thread
+    self.recv_thread = threading.Thread(target = self._reader)
+    self.recv_thread.start()
+
   def stop(self):
+    if self.recv_thread:
+      self.recv_stop.set()
+      self.recv_thread.join()
+
     self._socket.close()
 
-  def send(self, message, data):
+  def update(self, id, value):
+    self._send('set-state', {'id': id, 'state': str(value)})
+
+  def get_instruction(self):
+    try:
+      return self.recv_events.get(block = False)
+    except Queue.Empty:
+      return None
+
+  def _send(self, message, data):
     """encodes and sends a message to the server"""
     msg = self.encode({
       'message': message,
@@ -32,25 +63,30 @@ class Client:
       })
     self._socket.sendall(msg)
 
-  def read(self):
-    """returns a message from server, or None"""
-    no_data = False
-    while True:
+  def _reader(self):
+    """performs the reading from the socket and handling messages"""
+    def parse_msg(msg):
+      if msg['message'] == 'set-display':
+        return {'type': 'display', 'message': msg['data']['message']}
+
+      if msg['message'] == 'set-status':
+        try:
+          status = msg['data']['message']
+          return {'type': 'status', 'message': status}
+        except KeyError:
+          status = msg['data']['progress']
+          return {'type': 'progress', 'message': status}
+
+    while not self.recv_stop.isSet():
       try:
         self.read_buffer += self._socket.recv(4096)
       except socket.error:
-        no_data = True
+        time.sleep(0.02)
 
       msg = self.pop_from_buffer()
-      if msg:
-        return msg
-      elif no_data:
-        break
-
-  def encode(self, msg):
-    """encodes a message to send to the server"""
-    jstr = json.dumps(msg)
-    return struct.pack('>I%ds' % len(jstr), len(jstr), jstr)
+      while msg:
+        self.recv_events.put(parse_msg(msg))
+        msg = self.pop_from_buffer()
 
   def pop_from_buffer(self):
     """parses a message read from the buffer"""
@@ -69,3 +105,8 @@ class Client:
     self.read_buffer = self.read_buffer[msg_ends_at:]
 
     return json.loads(msg)
+
+  def encode(self, msg):
+    """encodes a message to send to the server"""
+    jstr = json.dumps(msg)
+    return struct.pack('>I%ds' % len(jstr), len(jstr), jstr)

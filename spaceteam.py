@@ -9,43 +9,16 @@ from spaceteam import state
 import time
 import sdnotify
 
-SERVER_IP = '10.110.0.1'
+#SERVER_IP = '10.110.0.10'
+SERVER_IP = '10.0.0.1'
 
-def comms(client, prev_state, new_state):
+def updates(prev, new):
   diffs = {}
-  for k in prev_state:
-    if prev_state[k] != new_state[k]:
-      diffs[k] = new_state[k]
+  for k in prev:
+    if prev[k] != new[k]:
+      diffs[k] = new[k]
 
-  if not client:
-    if diffs:
-      print "diffs: %s" % diffs
-    time.sleep(0.01)
-    return
-
-  # send any changes in our local state
-  for diff in diffs:
-    client.send('set-state', {'id': diff, 'state': diffs[diff]})
-
-  # recieve any instructions from the network
-  message = None
-  status = None
-
-  from_server = client.read()
-  while from_server is not None:
-    if from_server['message'] == 'set-display':
-      message = from_server['data']['message']
-      print "set display to %s" % message
-
-    if message['message'] == 'set-status':
-      try:
-        status = message['data']['message']
-      except KeyError:
-        status = int(message['data']['progress'])
-
-      print "set status to %s" % status
-
-  return (message, status)
+  return diffs
 
 def main(args):
   # load and initialize our peripherals
@@ -58,28 +31,52 @@ def main(args):
     PeripheralReader.begin_reading(peripherals.ALL)
     time.sleep(1) # give some reader loops
 
-    # initialize local state
-    prev_state = state.generate()
+    # initialize an announce message
+    announce = state.announce()
 
     # initialize client connection
     if '--local' in args:
       print "Acting in local mode!"
     else:
-      client = Client()
-      client.connect(SERVER_IP)
-      client.send('announce', prev_state)
+      client = Client(SERVER_IP)
+      client.start(announce)
 
     # initialize systemd notifications
     notifier = sdnotify.SystemdNotifier()
     notifier.notify("READY=1")
 
     # loop, generating new state each time
+    prev_state = state.generate()
     while True:
+      # first, deal with any state updates
       new_state = state.generate()
-      message, status = comms(client, prev_state, new_state)
+      for id, val in updates(prev_state, new_state).items():
+        print "sending diff %s: %s" % (id, val)
+        if client:
+          client.update(id, val)
+        else:
+          time.sleep(0.001)
+
+      # update the state
       prev_state = new_state
 
-      notifier.notify("WATCHDOG=1")
+      # deal with any messages from the server
+      if not client:
+        time.sleep(0.001)
+        continue
+
+      inst = client.get_instruction()
+      while inst is not None:
+        print inst
+        if inst['type'] == 'display':
+          peripherals.DISPLAY.message = inst['message']
+        elif inst['type'] == 'status':
+          peripherals.DISPLAY.status = inst['message']
+        elif inst['type'] == 'progress':
+          peripherals.DISPLAY.status = inst['message']
+
+        # get next instruction
+        inst = client.get_instruction()
 
   finally:
     if client:

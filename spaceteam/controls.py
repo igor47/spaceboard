@@ -126,7 +126,7 @@ class Keypad(object):
 
     # what should we be displaying right now?
     self.display = ['H', 'E', 'H']
-    self.value = list(self.display)
+    self.value = 0
 
   def callback_for(self, label):
     return lambda btn: self.key_pressed(label, btn)
@@ -143,7 +143,7 @@ class Keypad(object):
     elif label == 'ok':
       if self.input_mode:
         self.input_mode = False
-        self.value = list(self.display)
+        self.value = "".join([str(s) for s in self.display])
 
     else:
       if self.input_mode:
@@ -221,7 +221,8 @@ class Analog(object):
     self.device.enable_pin(pin)
 
   def read(self):
-    cur_value = self.device.read(self.pin, scaled = True)
+    cur_value = int(self.device.read(self.pin, scaled = True))
+    cur_value = 1 if cur_value == 0 else cur_value
 
     # we only save the new value if it's changed more than threshold
     # this prevents oscillating due to analog jitter
