@@ -127,6 +127,198 @@ INPUTS = [
     },
   },
   {
+    'id': "big_green_push",
+    'control': Switch(
+      device = MCP25,
+      pin = 0,
+    ),
+    'actions': {
+      'True': 'Push the big green pushbutton!'
+    },
+  },
+  {
+    'id': "big_red_push",
+    'control': Switch(
+      device = MCP25,
+      pin = 15,
+    ),
+    'actions': {
+      'True': 'Push the big red pushbutton!'
+    },
+  },
+  {
+    'id': "red_rocket_5",
+    'control': Switch(
+      device = MCP25,
+      pin = 6,
+    ),
+    'type': 'switch',
+    'description': 'fifth red rocket toggle',
+  },
+  {
+    'id': "red_rocket_4",
+    'control': Switch(
+      device = MCP25,
+      pin = 7,
+    ),
+    'type': 'switch',
+    'description': 'fourth red rocket toggle',
+  },
+  {
+    'id': "red_rocket_3",
+    'control': Switch(
+      device = MCP24,
+      pin = 1,
+    ),
+    'type': 'switch',
+    'description': 'third red rocket toggle',
+  },
+  {
+    'id': "red_rocket_2",
+    'control': Switch(
+      device = MCP24,
+      pin = 2,
+    ),
+    'type': 'switch',
+    'description': 'second red rocket toggle',
+  },
+  {
+    'id': "red_rocket_1",
+    'control': Switch(
+      device = MCP24,
+      pin = 5,
+    ),
+    'type': 'switch',
+    'description': 'first red rocket toggle',
+  },
+  {
+    'id': "yellow_rocket_3",
+    'control': Switch(
+      device = MCP24,
+      pin = 0,
+    ),
+    'type': 'switch',
+    'description': 'last yellow rocket toggle',
+  },
+  {
+    'id': "yellow_rocket_2",
+    'control': Switch(
+      device = MCP24,
+      pin = 3,
+    ),
+    'type': 'switch',
+    'description': 'second yellow rocket toggle',
+  },
+  {
+    'id': "yellow_rocket_1",
+    'control': Switch(
+      device = MCP24,
+      pin = 6,
+    ),
+    'type': 'switch',
+    'description': 'first yellow rocket toggle',
+  },
+  {
+    'id': "red_arcade_2",
+    'control': Switch(
+      device = MCP24,
+      pin = 4,
+    ),
+    'actions': {
+      'True': 'Push the second red arcade button!'
+    },
+  },
+  {
+    'id': "red_arcade_1",
+    'control': Switch(
+      device = MCP24,
+      pin = 7,
+    ),
+    'actions': {
+      'True': 'Push the first red arcade button!'
+    },
+  },
+  {
+    'id': "white_arcade_2",
+    'control': Switch(
+      device = MCP24,
+      pin = 9,
+    ),
+    'actions': {
+      'True': 'Push the second white arcade button!'
+    },
+  },
+  {
+    'id': "white_arcade_1",
+    'control': Switch(
+      device = MCP24,
+      pin = 8,
+    ),
+    'actions': {
+      'True': 'Push the first white arcade button!'
+    },
+  },
+  {
+    'id': "yellow_arcade_2",
+    'control': Switch(
+      device = MCP24,
+      pin = 15,
+    ),
+    'actions': {
+      'True': 'Push the second yellow arcade button!'
+    },
+  },
+  {
+    'id': "yellow_arcade_1",
+    'control': Switch(
+      device = MCP24,
+      pin = 12,
+    ),
+    'actions': {
+      'True': 'Push the first yellow arcade button!'
+    },
+  },
+  {
+    'id': "blue_arcade_2",
+    'control': Switch(
+      device = MCP24,
+      pin = 11,
+    ),
+    'actions': {
+      'True': 'Push the second blue arcade button!'
+    },
+  },
+  {
+    'id': "blue_arcade_1",
+    'control': Switch(
+      device = MCP24,
+      pin = 10,
+    ),
+    'actions': {
+      'True': 'Push the first blue arcade button!'
+    },
+  },
+  {
+    'id': "green_arcade_2",
+    'control': Switch(
+      device = MCP24,
+      pin = 14,
+    ),
+    'actions': {
+      'True': 'Push the second green arcade button!'
+    },
+  },
+  {
+    'id': "green_arcade_1",
+    'control': Switch(
+      device = MCP24,
+      pin = 13,
+    ),
+    'actions': {
+      'True': 'Push the first green arcade button!'
+    },
+  },
+  {
     'id': 'keypad',
     'control': Keypad({
       1: KeypadButton(MCP27, pin = 15, led_id = 18),
