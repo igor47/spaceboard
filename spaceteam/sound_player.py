@@ -64,8 +64,8 @@ class SoundPlayer(object):
     src_dir = os.path.dirname(__file__)
     sound_dir = os.path.abspath(os.path.join(src_dir, '../sounds'))
     all_sounds = os.path.join(sound_dir, '*.wav')
-    self.sounds = {
-        (os.path.basename(name)[:-4], _Sound(name)) for name in glob.glob(all_sounds)}
+    self.sounds = dict(
+        (os.path.basename(name)[:-4], _Sound(name)) for name in glob.glob(all_sounds))
 
   def reset(self):
     self.mixer.start()

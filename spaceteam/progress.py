@@ -51,7 +51,6 @@ class Progress(object):
     # what's the color and index of the last led on?
     color = self.color_range[int(fpct * len(self.color_range))]
     idx = int(self.led_count * fpct) + 1
-    print "fpct: %s color is %s idx is %s" % (fpct, color.rgb, idx)
 
     # set the colors
     new_colors = [color] * idx

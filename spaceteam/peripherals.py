@@ -45,7 +45,6 @@ ALL = [
     MCP27,
     ANALOG1,
     PROGRESS,
-    SOUNDS,
     ]
 
 def reset_all():

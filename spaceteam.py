@@ -54,7 +54,6 @@ def main(args):
       # first, deal with any state updates
       new_state = state.generate()
       for id, val in updates(prev_state, new_state).items():
-        print "sending diff %s: %s" % (id, val)
         if client:
           client.update(id, val)
         else:
@@ -70,7 +69,6 @@ def main(args):
 
       inst = client.get_instruction()
       while inst is not None:
-        print inst
         if inst['type'] == 'display':
           peripherals.DISPLAY.message = inst['message']
 

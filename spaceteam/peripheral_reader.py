@@ -42,12 +42,11 @@ class PeripheralReader(threading.Thread):
 
   def run(self):
     while not self._stop.isSet():
-      start = time.time()
       for p in self.peripherals:
+        start = time.time()
         p.communicate()
-      end = time.time()
+        end = time.time()
 
-      runtime_ms = (end - start) * 1000
-      if runtime_ms > self.DEADLINE_MS:
-        #print "We took {0:0.3f} millis to read inputs".format(runtime_ms)
-        pass
+        runtime_ms = (end - start) * 1000
+        if runtime_ms > self.DEADLINE_MS:
+          print "{1:06.2f} millis: {0:s}".format(p, runtime_ms)
