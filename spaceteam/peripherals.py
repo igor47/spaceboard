@@ -33,6 +33,9 @@ DISPLAY = SSD1306(_SMBUS)
 from progress import Progress
 PROGRESS = Progress(MAPLE)
 
+from sound_player import SoundPlayer
+SOUNDS = SoundPlayer()
+
 ALL = [
     DISPLAY,
     MAPLE,
@@ -42,6 +45,7 @@ ALL = [
     MCP27,
     ANALOG1,
     PROGRESS,
+    SOUNDS,
     ]
 
 def reset_all():
@@ -85,3 +89,4 @@ def reset_all():
       adc.reset()
 
   DISPLAY.message = 'READY!'
+  SOUNDS.play('bootup')
