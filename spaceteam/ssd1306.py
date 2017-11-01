@@ -12,10 +12,11 @@ class SSD1306(object):
 
   def __init__(self, smbus, address = 0x3c):
     self.smbus = smbus
-    self.device = ssd1306(bus = self.smbus, address = address)
+    self.address = address
+    self.device = None
 
     self.prev_message = None
-    self.message = "Hello World!"
+    self.message = "Initializing navigation...."
 
     self.prev_status = None
     self.status = 0.5
@@ -30,6 +31,7 @@ class SSD1306(object):
 
   def reset(self):
     with self.smbus.lock_grabber():
+      self.device = ssd1306(bus = self.smbus, address = self.address)
       self.device.show()
       self._write()
 

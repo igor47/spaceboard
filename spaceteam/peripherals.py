@@ -39,6 +39,15 @@ ALL = [
 
 def reset_all():
   """resets all peripherals"""
+  # start by toggling the reset pin
+  wiringpi.pinMode(RESET_PIN, wiringpi.OUTPUT)
+  wiringpi.digitalWrite(RESET_PIN, 0)
+  time.sleep(0.1)
+  wiringpi.digitalWrite(RESET_PIN, 1)
+
+  # initialize the display
+  DISPLAY.reset()
+
   # reset any microcontrollers
   micros = [p for p in ALL if type(p) == Microcontroller]
   for micro in micros:
@@ -56,14 +65,6 @@ def reset_all():
   # re-initalize any mcp port expanders
   mcps = [p for p in ALL if type(p) == MCP23017]
   if len(mcps) > 0:
-    # send a reset to re-init all the mcps
-    wiringpi.pinMode(RESET_PIN, wiringpi.OUTPUT)
-
-    wiringpi.digitalWrite(RESET_PIN, 0)
-    time.sleep(0.1)
-    wiringpi.digitalWrite(RESET_PIN, 1)
-
-    # send initial config to every mcp
     for mcp in mcps:
       mcp.reset()
 
@@ -76,7 +77,4 @@ def reset_all():
     for adc in adcs:
       adc.reset()
 
-  # reset any displays
-  displays = [p for p in ALL if type(p) == SSD1306]
-  for display in displays:
-    display.reset()
+  DISPLAY.message = 'READY!'

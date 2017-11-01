@@ -48,6 +48,9 @@ def main(args):
     # loop, generating new state each time
     prev_state = state.generate()
     while True:
+      # always notify that we're still running
+      notifier.notify("WATCHDOG=1")
+
       # first, deal with any state updates
       new_state = state.generate()
       for id, val in updates(prev_state, new_state).items():
