@@ -60,7 +60,8 @@ class SSD1306(object):
           stat = float(self.status)
         except ValueError:
           stat = self.status
-          draw.text((10, 40), stat, fill="white", font = self.font)
+          if stat:
+            draw.text((10, 40), stat, fill="white", font = self.font)
         else:
           width = int(self.device.width * stat)
           print "width is %s" % width
