@@ -30,6 +30,9 @@ MCP27 = MCP23017(_SMBUS, 0x27)
 from ssd1306 import SSD1306
 DISPLAY = SSD1306(_SMBUS)
 
+from progress import Progress
+PROGRESS = Progress(MAPLE)
+
 ALL = [
     DISPLAY,
     MAPLE,
@@ -38,6 +41,7 @@ ALL = [
     MCP26,
     MCP27,
     ANALOG1,
+    PROGRESS,
     ]
 
 def reset_all():

@@ -73,10 +73,13 @@ def main(args):
         print inst
         if inst['type'] == 'display':
           peripherals.DISPLAY.message = inst['message']
-        elif inst['type'] == 'status':
-          peripherals.DISPLAY.status = inst['message']
+
         elif inst['type'] == 'progress':
-          peripherals.DISPLAY.status = inst['message']
+          peripherals.PROGRESS.pct = inst['message']
+
+        #TODO: find some place to write the status
+        elif inst['type'] == 'status':
+          pass
 
         # get next instruction
         inst = client.get_instruction()

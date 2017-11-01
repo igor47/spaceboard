@@ -18,9 +18,6 @@ class SSD1306(object):
     self.prev_message = None
     self.message = "Initializing navigation...."
 
-    self.prev_status = None
-    self.status = 0.5
-
     self.font = self.get_font(self.FONT, self.FONT_SIZE)
 
   def get_font(self, name, size):
@@ -36,7 +33,7 @@ class SSD1306(object):
       self._write()
 
   def communicate(self):
-    if self.prev_message != self.message or self.prev_status != self.status:
+    if self.prev_message != self.message:
       self._write()
 
   def _write(self):
@@ -54,18 +51,3 @@ class SSD1306(object):
           y += 14
 
         self.prev_message = msg
-
-        # now, write the status
-        try:
-          stat = float(self.status)
-        except ValueError:
-          stat = self.status
-          if stat:
-            draw.text((10, 40), stat, fill="white", font = self.font)
-        else:
-          width = int(self.device.width * stat)
-          print "width is %s" % width
-          box = (10, 40, 10 + width, 50)
-          draw.rectangle(box, outline="white", fill="white")
-
-        self.prev_status = stat

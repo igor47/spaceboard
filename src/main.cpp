@@ -34,7 +34,7 @@ void clearStrip();
 #define LED_BUILTIN 33
 
 #define LED_STRIP_PIN 14  // we chose a pin on GPIO port C in case we switch to DMA
-#define LED_COUNT 45
+#define LED_COUNT 60
 Adafruit_NeoPixel strip = Adafruit_NeoPixel(LED_COUNT, LED_STRIP_PIN, NEO_GRB + NEO_KHZ800);
 
 static const uint32_t BaudRate = 115200;  // baud
@@ -63,7 +63,7 @@ void setup()
   // NOTE: DO NOT REMOVE ABOVE LINE
 
   // allows a quick visual check that all the leds work/a reset just happened
-  colorWipe(strip.Color(10, 10, 10), 5);
+  colorWipe(strip.Color(20, 20, 20), 50);
   clearStrip();
 
   Serial.print("boot!\n");
