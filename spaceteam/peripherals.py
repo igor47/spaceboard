@@ -4,7 +4,6 @@ Initializes and provides access to board peripherals
 """
 
 import time
-import threading
 
 # initialize GPIO
 import wiringpi

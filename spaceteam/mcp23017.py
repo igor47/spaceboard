@@ -46,6 +46,8 @@ class MCP23017(object):
     self.output_latches = [0] * 16
     self.output_latches_changed = False
 
+    self.pullups = [1] * 16
+
   def reset(self):
     """initializes us in a sane configuration"""
     with self.smbus.lock_grabber():
@@ -155,5 +157,11 @@ class MCP23017(object):
 
   def _enable_pullups(self):
     """Enable pull-up resistors on all input pins"""
-    self.smbus.write_byte_data(self.address, GPPUA_ADDR, 0xFF)
-    self.smbus.write_byte_data(self.address, GPPUB_ADDR, 0xFF)
+    self.smbus.write_byte_data(
+        self.address,
+        GPPUA_ADDR,
+        bitlist_to_int(self.pullups[0:8]))
+    self.smbus.write_byte_data(
+        self.address,
+        GPPUB_ADDR,
+        bitlist_to_int(self.pullups[8:16]))

@@ -148,7 +148,7 @@ INPUTS = [
   },
   {
     'id': "red_rocket_5",
-    'control': Switch(
+    'control': SwitchWithPulldown(
       device = MCP25,
       pin = 6,
     ),
@@ -157,7 +157,7 @@ INPUTS = [
   },
   {
     'id': "red_rocket_4",
-    'control': Switch(
+    'control': SwitchWithPulldown(
       device = MCP25,
       pin = 7,
     ),
@@ -166,7 +166,7 @@ INPUTS = [
   },
   {
     'id': "red_rocket_3",
-    'control': Switch(
+    'control': SwitchWithPulldown(
       device = MCP24,
       pin = 1,
     ),
@@ -175,7 +175,7 @@ INPUTS = [
   },
   {
     'id': "red_rocket_2",
-    'control': Switch(
+    'control': SwitchWithPulldown(
       device = MCP24,
       pin = 2,
     ),
@@ -184,7 +184,7 @@ INPUTS = [
   },
   {
     'id': "red_rocket_1",
-    'control': Switch(
+    'control': SwitchWithPulldown(
       device = MCP24,
       pin = 5,
     ),
@@ -193,7 +193,7 @@ INPUTS = [
   },
   {
     'id': "yellow_rocket_3",
-    'control': Switch(
+    'control': SwitchWithPulldown(
       device = MCP24,
       pin = 0,
     ),
@@ -202,7 +202,7 @@ INPUTS = [
   },
   {
     'id': "yellow_rocket_2",
-    'control': Switch(
+    'control': SwitchWithPulldown(
       device = MCP24,
       pin = 3,
     ),
@@ -211,12 +211,120 @@ INPUTS = [
   },
   {
     'id': "yellow_rocket_1",
-    'control': Switch(
+    'control': SwitchWithPulldown(
       device = MCP24,
       pin = 6,
     ),
     'type': 'switch',
     'description': 'first yellow rocket toggle',
+  },
+  {
+    'id': "red_rocker_1",
+    'control': SwitchWithPulldown(
+      device = MCP25,
+      pin = 2,
+    ),
+    'type': 'switch',
+    'description': 'first red rocker',
+  },
+  {
+    'id': "red_rocker_2",
+    'control': SwitchWithPulldown(
+      device = MCP25,
+      pin = 1,
+    ),
+    'type': 'switch',
+    'description': 'second red rocker',
+  },
+  {
+    'id': "red_rocker_3",
+    'control': SwitchWithPulldown(
+      device = MCP25,
+      pin = 4,
+    ),
+    'type': 'switch',
+    'description': 'third red rocker',
+  },
+  {
+    'id': "red_rocker_4",
+    'control': SwitchWithPulldown(
+      device = MCP25,
+      pin = 3,
+    ),
+    'type': 'switch',
+    'description': 'last red rocker',
+  },
+  {
+    'id': "green_rocker_1",
+    'control': SwitchWithPulldown(
+      device = MCP25,
+      pin = 8,
+    ),
+    'type': 'switch',
+    'description': 'first green rocker',
+  },
+  {
+    'id': "green_rocker_2",
+    'control': SwitchWithPulldown(
+      device = MCP25,
+      pin = 10,
+    ),
+    'type': 'switch',
+    'description': 'second green rocker',
+  },
+  {
+    'id': "green_rocker_3",
+    'control': SwitchWithPulldown(
+      device = MCP25,
+      pin = 9,
+    ),
+    'type': 'switch',
+    'description': 'third green rocker',
+  },
+  {
+    'id': "green_rocker_4",
+    'control': SwitchWithPulldown(
+      device = MCP25,
+      pin = 12,
+    ),
+    'type': 'switch',
+    'description': 'last green rocker',
+  },
+  {
+    'id': "blue_rocker_1",
+    'control': SwitchWithPulldown(
+      device = MCP25,
+      pin = 5,
+    ),
+    'type': 'switch',
+    'description': 'first blue rocker',
+  },
+  {
+    'id': "blue_rocker_2",
+    'control': SwitchWithPulldown(
+      device = MCP25,
+      pin = 14,
+    ),
+    'type': 'switch',
+    'description': 'second blue rocker',
+  },
+  {
+    'id': "blue_rocker_3",
+    'control': SwitchWithPulldown(
+      device = MCP25,
+      pin = 11,
+    ),
+    'type': 'switch',
+    'description': 'third blue rocker',
+  },
+  {
+    'id': "blue_rocker_4",
+    'control': SwitchWithPulldown(
+      device = MCP25,
+      pin = 13,
+    ),
+    'type': 'switch',
+    'description': 'last blue rocker',
   },
   {
     'id': "red_arcade_2",

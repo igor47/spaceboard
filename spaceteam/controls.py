@@ -28,6 +28,12 @@ class Switch(object):
   def after_read(self):
     pass
 
+class SwitchWithPulldown(Switch):
+  """Like a normal switch, but disables the pull-up on an MCP"""
+  def __init__(self, device, pin):
+    Switch.__init__(self, device, pin)
+    device.pullups[pin] = 0
+
 class SwitchWithLight(Switch):
   ACTIVE_COLOR = Color("green")
   INACTIVE_COLOR = Color("orange")

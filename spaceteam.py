@@ -4,6 +4,7 @@ import spaceteam
 from spaceteam import Client
 from spaceteam import PeripheralReader
 
+from spaceteam import peripherals
 from spaceteam import state
 
 import time
@@ -22,7 +23,6 @@ def updates(prev, new):
 
 def main(args):
   # load and initialize our peripherals
-  from spaceteam import peripherals
   peripherals.reset_all()
 
   # begin looping over them, reading their state
