@@ -314,10 +314,10 @@ class Accelerator(object):
       pass
 
     if self.value == 0:
-      peripherals.SOUND.set_music('silence')
+      peripherals.SOUNDS.set_music('silence')
     else:
-      idx = len(self.sounds) * self.value / self.led_count
-      peripherals.SOUND.set_music(self.sounds[idx])
+      idx = (len(self.sounds) - 1) * self.value / self.led_count
+      peripherals.SOUNDS.set_music(self.sounds[idx])
 
 class RotaryEncoder(object):
   """A rotary encoder!"""

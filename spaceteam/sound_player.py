@@ -46,7 +46,7 @@ class SoundPlayer(object):
 
     self.channels.append(sound.play())
 
-  def set_music(self, name, volume = 0.3):
+  def set_music(self, name, volume = 0.4):
     if name is None:
       pg.mixer.music.fadeout(1)
     else:

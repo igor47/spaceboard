@@ -53,7 +53,7 @@ def main(args):
 
       # notify the watchdog that we're okay (otherwise we get rebooted by systemd)
       # if the power button is held down long enough, this will happen
-      if not prev_state['power']:  # button not pushed down
+      if prev_state['power']:  # button not pushed down
         notifier.notify("WATCHDOG=1")
 
       # read any peripherals
