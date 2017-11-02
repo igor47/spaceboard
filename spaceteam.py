@@ -81,9 +81,8 @@ def main(args):
         elif inst['type'] == 'progress':
           peripherals.PROGRESS.pct = inst['message']
 
-        #TODO: find some place to write the status
         elif inst['type'] == 'status':
-          pass
+          peripherals.DISPLAY.status = inst['message']
 
         # get next instruction
         inst = client.get_instruction()

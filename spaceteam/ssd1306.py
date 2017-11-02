@@ -5,10 +5,12 @@ from luma.oled.device import ssd1306
 from PIL import ImageFont
 import os
 import textwrap
+import time
 
 class SSD1306(object):
   FONT = 'inconsolata.ttf'
   FONT_SIZE = 12
+  STATUS_TIME_SEC = 2 # how long to display status messages
 
   def __init__(self, smbus, address = 0x3c):
     self.smbus = smbus
@@ -17,6 +19,9 @@ class SSD1306(object):
 
     self.prev_message = None
     self.message = "Initializing navigation...."
+
+    self.status = None
+    self.status_expires = None
 
     self.font = self.get_font(self.FONT, self.FONT_SIZE)
 
@@ -39,16 +44,32 @@ class SSD1306(object):
       self._write()
 
   def _write(self):
+    # we have an unexpired status -- leave it on the screen
+    if self.status_expires and time.time() < self.status_expires:
+      return
+
     with canvas(self.device) as draw:
+      # clear the screen by drawing a box over everything
       draw.rectangle(self.device.bounding_box, outline="white", fill="black")
 
-      # we've cleared the screen, now we write whatever is in our buffers
-      msg = self.message
-      lines = textwrap.wrap(msg, 18)
+      # figure out what text to draw
+      if self.status:
+        self._draw_text(draw, self.status)
+        self.status = None
+        self.prev_message = None
+        self.status_expires = time.time() + self.STATUS_TIME_SEC
 
-      y = 7
-      for line in lines:
-        draw.text((8, y), line, fill="white", font=self.font)
-        y += 14
+      # we should draw the current message
+      else:
+        self.status_expires = None
+        self.prev_message = self.message
+        self._draw_text(draw, self.message)
 
-      self.prev_message = msg
+  def _draw_text(self, draw, text):
+    """Actually draw the text on the screen"""
+    lines = textwrap.wrap(text, 18)
+
+    y = 7
+    for line in lines:
+      draw.text((8, y), line, fill="white", font=self.font)
+      y += 14
