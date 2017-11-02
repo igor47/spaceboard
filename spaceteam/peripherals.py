@@ -48,8 +48,19 @@ DISPLAY = SSD1306(_SMBUS)
 from progress import Progress
 PROGRESS = Progress(MAPLE)
 
+OUTPUTS = [
+    PROGRESS,
+    MAPLE,
+    DISPLAY,
+    ]
+
 from sound_player import SoundPlayer
 SOUNDS = SoundPlayer()
+
+ALL = INPUTS + OUTPUTS
+def read_all():
+  for p in ALL:
+    p.communicate()
 
 def reset_all():
   """resets all peripherals"""

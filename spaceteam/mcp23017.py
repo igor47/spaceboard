@@ -48,6 +48,9 @@ class MCP23017(object):
 
     self.pullups = [1] * 16
 
+  def __str__(self):
+    return "<MCP23017 at {:x}>".format(self.address)
+
   def reset(self):
     """initializes us in a sane configuration"""
     self._set_iocon()

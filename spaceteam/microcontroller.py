@@ -45,9 +45,6 @@ class Microcontroller(object):
     # How many commands we've sent to the microcontroller.
     self.commands_sent = 0
 
-    # used to make sure only a single thread tries to do I/O
-    self.io_lock = threading.Lock()
-
     # max brightness for the leds
     self.max_brightness = 180
 
@@ -57,16 +54,6 @@ class Microcontroller(object):
   def stop(self):
     """Shuts down communication to the microcontroller."""
     self._serial.close()
-
-  def _acquire_io_lock(self, timeout = 2):
-    """Acquire lock with a timeout"""
-    start_time = time.time()
-    while time.time() < start_time + timeout:
-      if self.io_lock.acquire(False):
-        return True
-      time.sleep(.05)
-
-    return False
 
   def _send_command(self, data = []):
     """Sends a command to the microcontroller.
@@ -78,19 +65,10 @@ class Microcontroller(object):
           True if command was sent, False if something went wrong. Note
           this doesn't guarantee the command was actually received.
     """
-    if not self._acquire_io_lock():
-      return False
+    encoded = cobs.encode(str(bytearray(data)))
+    self._serial.write(encoded + '\x00')
 
-    try:
-      encoded = cobs.encode(str(bytearray(data)))
-
-      self._serial.write(encoded)
-      self._serial.write('\x00')
-      self._serial.flush()
-      self.commands_sent += 1
-    finally:
-      self.io_lock.release()
-
+    self.commands_sent += 1
     return True
 
   def _reset_read_buf(self):
@@ -103,39 +81,32 @@ class Microcontroller(object):
     We expect to complete a read when this is invoked, so don't invoke unless
     you expect to get data from the microcontroller. we raise a timeout if we
     cannot read a command in the alloted timeout interval."""
-    if not self._acquire_io_lock():
-      return False
+    # we rely on the passed-in timeout
+    while True:
+      c = self._serial.read(1)
+      if not c:
+        raise serial.SerialTimeoutException(
+            "Couldn't recv command in %d seconds" % self.IO_TIMEOUT_SEC)
 
-    try:
-      # we rely on the passed-in timeout
-      while True:
-        c = self._serial.read(1)
-        if not c:
-          raise serial.SerialTimeoutException(
-              "Couldn't recv command in %d seconds" % self.IO_TIMEOUT_SEC)
+      # finished reading an entire COBS structure
+      if c == '\x00':
+        # grab the data and reset the buffer
+        data = self._read_buf[0:self._read_buf_pos]
+        self._reset_read_buf()
 
-        # finished reading an entire COBS structure
-        if c == '\x00':
-          # grab the data and reset the buffer
-          data = self._read_buf[0:self._read_buf_pos]
+        # return decoded data
+        return cobs.decode(str(bytearray(data)))
+
+      # still got reading to do
+      else:
+        self._read_buf[self._read_buf_pos] = c
+        self._read_buf_pos += 1
+
+        # ugh. buffer overflow. wat do?
+        if self._read_buf_pos == len(self._read_buf):
+          # resetting the buffer likely means the next recv will fail, too (we lost the start bits)
           self._reset_read_buf()
-
-          # return decoded data
-          return cobs.decode(str(bytearray(data)))
-
-        # still got reading to do
-        else:
-          self._read_buf[self._read_buf_pos] = c
-          self._read_buf_pos += 1
-
-          # ugh. buffer overflow. wat do?
-          if self._read_buf_pos == len(self._read_buf):
-            # resetting the buffer likely means the next recv will fail, too (we lost the start bits)
-            self._reset_read_buf()
-            raise RuntimeError("IO read buffer overflow :(")
-
-    finally:
-      self.io_lock.release()
+          raise RuntimeError("IO read buffer overflow :(")
 
   def get_state(self):
     """Updates the internal state with fresh data from the microcontroller"""

@@ -42,6 +42,9 @@ class ADS1115(object):
 
     self.last_pin_enabled = None
 
+  def __str__(self):
+    return "<ADS1115 at {:x}>".format(self.address)
+
   def communicate(self):
     """Reads the state of all enabled pins and saves it locally"""
     self._read_inputs()

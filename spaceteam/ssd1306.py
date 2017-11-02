@@ -20,6 +20,9 @@ class SSD1306(object):
 
     self.font = self.get_font(self.FONT, self.FONT_SIZE)
 
+  def __str__(self):
+    return "<SSD1306 at {:x}>".format(self.address)
+
   def get_font(self, name, size):
     src_dir = os.path.dirname(__file__)
     font_dir = os.path.abspath(os.path.join(src_dir, '../fonts'))

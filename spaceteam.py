@@ -2,7 +2,6 @@
 
 import spaceteam
 from spaceteam import Client
-from spaceteam import PeripheralReader
 
 from spaceteam import peripherals
 from spaceteam import state
@@ -29,7 +28,7 @@ def main(args):
   client = None
   try:
     # start communication with peripherals
-    PeripheralReader.begin_reading()
+    peripherals.read_all()
 
     # initialize an announce message
     announce = state.announce()
@@ -51,11 +50,12 @@ def main(args):
       # check that everything is still working
       if client and not client.running():
         raise RuntimeError("The client has stopped!")
-      if not PeripheralReader.running():
-        raise RuntimeError("The peripheral reader has stopped!")
 
       # notify the watchdog that we're okay (otherwise we get rebooted)
       notifier.notify("WATCHDOG=1")
+
+      # read any peripherals
+      peripherals.read_all()
 
       # first, deal with any state updates
       new_state = state.generate()
@@ -91,8 +91,6 @@ def main(args):
   finally:
     if client:
       client.stop()
-
-    PeripheralReader.stop_reading()
 
 # run spaceteam!
 import sys
