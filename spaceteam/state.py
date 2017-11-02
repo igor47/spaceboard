@@ -26,8 +26,10 @@ INPUTS = [
       led_up_id = 5,
       led_down_id = 6,
     ),
-    'type': 'switch',
-    'description': 'first silver toggle switch in the top row',
+    'actions': {
+      'True': 'Set the first silver toggle switch in the top row to blue',
+      'False': 'Set the first silver toggle switch in the top row to orange',
+    }
   },
   {
     'id': "silver_toggle_top_2",
@@ -37,8 +39,10 @@ INPUTS = [
       led_up_id = 4,
       led_down_id = 7,
       ),
-    'type': 'switch',
-    'description': 'second silver toggle switch in the top row',
+    'actions': {
+      'True': 'Set the second silver toggle switch in the top row to blue',
+      'False': 'Set the second silver toggle switch in the top row to orange',
+    }
   },
   {
     'id': "silver_toggle_top_3",
@@ -48,8 +52,10 @@ INPUTS = [
       led_up_id = 3,
       led_down_id = 8,
     ),
-    'type': 'switch',
-    'description': 'third silver toggle switch in the top row',
+    'actions': {
+      'True': 'Set the third silver toggle switch in the top row to blue',
+      'False': 'Set the third silver toggle switch in the top row to orange',
+    }
   },
   {
     'id': "silver_toggle_top_4",
@@ -59,8 +65,10 @@ INPUTS = [
       led_up_id = 2,
       led_down_id = 9,
     ),
-    'type': 'switch',
-    'description': 'last silver toggle switch in the top row',
+    'actions': {
+      'True': 'Set the last silver toggle switch in the top row to blue',
+      'False': 'Set the last silver toggle switch in the top row to orange',
+    }
   },
   {
     'id': "silver_toggle_bottom_1",
@@ -70,8 +78,10 @@ INPUTS = [
       led_up_id = 13,
       led_down_id = 14,
     ),
-    'type': 'switch',
-    'description': 'first silver toggle switch in the bottom row',
+    'actions': {
+      'True': 'Set the first silver toggle switch in the bottom row to blue',
+      'False': 'Set the first silver toggle switch in the bottom row to orange',
+    }
   },
   {
     'id': "silver_toggle_bottom_2",
@@ -81,8 +91,10 @@ INPUTS = [
       led_up_id = 12,
       led_down_id = 15,
     ),
-    'type': 'switch',
-    'description': 'second silver toggle switch in the bottom row',
+    'actions': {
+      'True': 'Set the second silver toggle switch in the bottom row to blue',
+      'False': 'Set the second silver toggle switch in the bottom row to orange',
+    }
   },
   {
     'id': "silver_toggle_bottom_3",
@@ -92,8 +104,10 @@ INPUTS = [
       led_up_id = 11,
       led_down_id = 16,
     ),
-    'type': 'switch',
-    'description': 'third silver toggle switch in the bottom row',
+    'actions': {
+      'True': 'Set the third silver toggle switch in the bottom row to blue',
+      'False': 'Set the third silver toggle switch in the bottom row to orange',
+    }
   },
   {
     'id': "silver_toggle_bottom_4",
@@ -103,8 +117,10 @@ INPUTS = [
       led_up_id = 10,
       led_down_id = 17,
     ),
-    'type': 'switch',
-    'description': 'last silver toggle switch in the bottom row',
+    'actions': {
+      'True': 'Set the last silver toggle switch in the bottom row to blue',
+      'False': 'Set the last silver toggle switch in the bottom row to orange',
+    }
   },
   {
     'id': "little_red_push",

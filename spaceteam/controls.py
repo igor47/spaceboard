@@ -55,11 +55,11 @@ class SwitchWithLight(Switch):
       self.prev_color = new_color
 
 class SwitchWithTwoLights(Switch):
-  UP_ON_COLOR = Color("green")
-  UP_OFF_COLOR = Color("red")
+  UP_ON_COLOR = Color(rgb = (0.8, 0.2, 0))
+  UP_OFF_COLOR = Color(rgb = (0.1, 0.025, 0))
 
-  DOWN_ON_COLOR = Color("green")
-  DOWN_OFF_COLOR = Color("blue")
+  DOWN_ON_COLOR = Color(rgb = (0, 0.2, 0.4))
+  DOWN_OFF_COLOR = Color(rgb = (0, 0.025, 0.05))
 
   def __init__(self, device, pin, led_up_id, led_down_id):
     Switch.__init__(self, device, pin)
