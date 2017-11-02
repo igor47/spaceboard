@@ -63,6 +63,7 @@ def main(args):
         if client:
           client.update(id, val)
         else:
+          print "updating %s: %s" % (id, val)
           time.sleep(0.001)
 
       # update the state

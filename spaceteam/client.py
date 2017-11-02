@@ -31,10 +31,6 @@ class Client:
     self._socket.connect((self.host, self.port))
     self._send('announce', announce)
 
-    # don't do this until after we send an announcement
-    # otherwise we sometimes fail to send all of the data
-    self._socket.setblocking(0)
-
     # start the reader thread
     self.recv_thread = threading.Thread(target = self._reader)
     self.recv_thread.start()
@@ -81,10 +77,7 @@ class Client:
           return {'type': 'progress', 'message': status}
 
     while not self.recv_stop.isSet():
-      try:
-        self.read_buffer += self._socket.recv(4096)
-      except socket.error:
-        time.sleep(0.02)
+      self.read_buffer += self._socket.recv(4096)
 
       msg = self.pop_from_buffer()
       while msg:
