@@ -1,7 +1,7 @@
 [Service]
 # you will probably need to modify this one
 WorkingDirectory=/home/pi/spaceboard
-ExecStart=/home/pi/spaceboard/spaceteam.py --local
+ExecStart=/home/pi/spaceboard/spaceteam.py
 
 Type=notify
 
