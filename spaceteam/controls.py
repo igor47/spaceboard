@@ -278,6 +278,15 @@ class Accelerator(object):
         Color(rgb = (0.80, 0.10, 0)),
         Color(rgb = (0.90, 0.05, 0)),
       ]
+    self.sounds = [
+        'engine0',
+        'engine1',
+        'engine2',
+        'engine3',
+        'engine4',
+        'engine5',
+        'engine6',
+      ]
 
   def read(self):
     self.sensor.read()
@@ -286,6 +295,7 @@ class Accelerator(object):
     self.prev_value = self.value
     self.value = int(self.led_count * pct)
     self.set_leds()
+    self.set_music()
 
   def set_leds(self):
     """loads the attached led string with the correct colors"""
@@ -298,6 +308,16 @@ class Accelerator(object):
     new_colors += [self.black] * (self.led_count - self.value) # these are off
 
     peripherals.MAPLE.set_led_batch(self.first_led_id, new_colors[::-1])
+
+  def set_music(self):
+    if self.value == self.prev_value:
+      pass
+
+    if self.value == 0:
+      peripherals.SOUND.set_music(None)
+    else:
+      idx = len(self.sounds) * self.value / self.led_count
+      peripherals.SOUND.set_music(self.sounds[idx])
 
 class RotaryEncoder(object):
   """A rotary encoder!"""

@@ -2,84 +2,60 @@
 """Functionality to play sounds in response to events"""
 
 import glob
+import pygame as pg
 import os
-import pyaudio
-import Queue
-import threading
 import time
-import wave
-
-class _Sound(object):
-  """container for sound files"""
-  def __init__(self, path):
-    self.wf = wave.open(path, 'rb')
-
-class Mixer(threading.Thread):
-  CHUNKSIZE = 1024
-
-  def __init__(self):
-    threading.Thread.__init__(self, name = 'player_mixer')
-    self.setDaemon(True)
-    self._queue = Queue.Queue(0)
-    self.pyaudio = pyaudio.PyAudio()
-    self._stop = threading.Event()
-
-  def stop(self, final_sound = None):
-    self._stop.set()
-    self.join()
-    if final_sound:
-        self._play(final_sound)
-
-    self.pyaudio.terminate()
-
-  def run(self):
-    while not self._stop.isSet():
-      try:
-        sound = self._queue.get(block=False, timeout=0.1)
-        self._play(sound)
-      except Queue.Empty:
-        pass
-
-  def queue(self, sound):
-    self._queue.put(sound)
-
-  def _play(self, sound):
-    stream = self.pyaudio.open(
-        format=self.pyaudio.get_format_from_width(sound.wf.getsampwidth()),
-        channels=sound.wf.getnchannels(),
-        rate=sound.wf.getframerate(),
-        output=True)
-    stream.start_stream()
-    sound.wf.rewind()
-    data = sound.wf.readframes(Mixer.CHUNKSIZE)
-    while data != '':
-      stream.write(data)
-      data = sound.wf.readframes(Mixer.CHUNKSIZE)
-    stream.close()
 
 class SoundPlayer(object):
   def __init__(self):
-    self.mixer = Mixer()
+    # init the mixer
+    pg.mixer.init(
+        frequency = 48000,
+        size = -16,
+        channels = 2,
+        buffer = 4096,
+      )
+    pg.init()
+    pg.mixer.set_num_channels(20)
 
+    # find the sounds we have saved
     src_dir = os.path.dirname(__file__)
     sound_dir = os.path.abspath(os.path.join(src_dir, '../sounds'))
     all_sounds = os.path.join(sound_dir, '*.wav')
-    self.sounds = dict(
-        (os.path.basename(name)[:-4], _Sound(name)) for name in glob.glob(all_sounds))
+    self.sounds = dict((os.path.basename(name)[:-4], name) for name in glob.glob(all_sounds))
+
+    # thread management
+    self.channels = []
 
   def reset(self):
-    self.mixer.start()
+    "nothing to do here"
+    pass
 
-  def play(self, name):
-    self.mixer.queue(self.sounds[name])
+  def stop(self):
+    while len(self.channels) > 0:
+      for channel in self.channels:
+        if not channel.get_busy():
+          self.channels.remove(channel)
 
-  def stop(self, final_sound = None):
-    self.mixer.stop(final_sound)
-    self.mixer.join()
+      time.sleep(0.1)
+
+  def play(self, name, volume = None):
+    sound = pg.mixer.Sound(self.sounds[name])
+    if volume:
+      sound.set_volume(volume)
+
+    self.channels.append(sound.play())
+
+  def set_music(self, name, volume = 0.3):
+    if name is None:
+      pg.mixer.music.fadeout(1)
+    else:
+      pg.mixer.music.load(self.sounds[name])
+      pg.mixer.music.play(-1)
+      if volume:
+        pg.mixer.music.set_volume(volume)
 
 if __name__ == "__main__":
-    mixer = Mixer()
-    mixer.start()
-    mixer.queue(SoundPlayer.SOUNDS['startup'])
-    time.sleep(2)
-    mixer.stop()
+  p = SoundPlayer()
+  p.play('space')
+  p.stop()
