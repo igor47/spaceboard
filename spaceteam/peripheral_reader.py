@@ -25,6 +25,10 @@ class PeripheralReader(threading.Thread):
       cls.__READER.stop()
       cls.__READER = None
 
+  @classmethod
+  def running(cls):
+    return (cls.__READER and cls.__READER.is_alive())
+
   # private stuff
   __READER = None
   DEADLINE_MS = 30  # we should read the peripherals this often

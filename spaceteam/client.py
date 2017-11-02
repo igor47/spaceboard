@@ -55,6 +55,9 @@ class Client:
     except Queue.Empty:
       return None
 
+  def running(self):
+    return (self.recv_thread and self.recv_thread.is_alive())
+
   def _send(self, message, data):
     """encodes and sends a message to the server"""
     msg = self.encode({

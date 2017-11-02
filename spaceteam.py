@@ -48,7 +48,13 @@ def main(args):
     # loop, generating new state each time
     prev_state = state.generate()
     while True:
-      # always notify that we're still running
+      # check that everything is still working
+      if client and not client.running():
+        raise RuntimeError("The client has stopped!")
+      if not PeripheralReader.running():
+        raise RuntimeError("The peripheral reader has stopped!")
+
+      # notify the watchdog that we're okay (otherwise we get rebooted)
       notifier.notify("WATCHDOG=1")
 
       # first, deal with any state updates
