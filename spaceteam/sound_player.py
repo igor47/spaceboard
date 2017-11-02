@@ -33,11 +33,8 @@ class SoundPlayer(object):
 
   def stop(self):
     while len(self.channels) > 0:
-      for channel in self.channels:
-        if not channel.get_busy():
-          self.channels.remove(channel)
-
       time.sleep(0.1)
+      self.clean_up_channels()
 
   def play(self, name, volume = None):
     sound = pg.mixer.Sound(self.sounds[name])
@@ -45,6 +42,12 @@ class SoundPlayer(object):
       sound.set_volume(volume)
 
     self.channels.append(sound.play())
+    self.clean_up_channels()
+
+  def clean_up_channels(self):
+    for channel in self.channels:
+      if not channel.get_busy():
+        self.channels.remove(channel)
 
   def set_music(self, name, volume = 0.4):
     if name is None:
