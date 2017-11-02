@@ -314,7 +314,7 @@ class Accelerator(object):
       pass
 
     if self.value == 0:
-      peripherals.SOUND.set_music(None)
+      peripherals.SOUND.set_music('silence')
     else:
       idx = len(self.sounds) * self.value / self.led_count
       peripherals.SOUND.set_music(self.sounds[idx])
