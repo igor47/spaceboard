@@ -3,6 +3,7 @@
 Initializes and provides access to board peripherals
 """
 
+import smbus
 import time
 
 # initialize GPIO
@@ -11,12 +12,15 @@ wiringpi.wiringPiSetup()
 
 RESET_PIN = 27
 
-# initialize I2C
-from spacebus import Spacebus
-_SMBUS = Spacebus()
+# handling i2c resets
+I2C_ALL_CALL = 0x0 # all call address -- goes to all devices (that support it)
+I2C_SOFT_RESET = 0x06 # all devices reset
+def all_call_reset(bus):
+  bus.write_byte(I2C_ALL_CALL, I2C_SOFT_RESET)
 
-from microcontroller import Microcontroller
-MAPLE = Microcontroller("/dev/serial0")
+# initialize I2C
+BUS_ID = 1
+_SMBUS = smbus.SMBus(BUS_ID)
 
 from ads1115 import ADS1115
 ANALOG1 = ADS1115(_SMBUS, 0x48)
@@ -27,6 +31,17 @@ MCP25 = MCP23017(_SMBUS, 0x25)
 MCP26 = MCP23017(_SMBUS, 0x26)
 MCP27 = MCP23017(_SMBUS, 0x27)
 
+INPUTS = [
+    MCP24,
+    MCP25,
+    MCP26,
+    MCP27,
+    ANALOG1,
+    ]
+
+from microcontroller import Microcontroller
+MAPLE = Microcontroller("/dev/serial0")
+
 from ssd1306 import SSD1306
 DISPLAY = SSD1306(_SMBUS)
 
@@ -35,17 +50,6 @@ PROGRESS = Progress(MAPLE)
 
 from sound_player import SoundPlayer
 SOUNDS = SoundPlayer()
-
-ALL = [
-    DISPLAY,
-    MAPLE,
-    MCP24,
-    MCP25,
-    MCP26,
-    MCP27,
-    ANALOG1,
-    PROGRESS,
-    ]
 
 def reset_all():
   """resets all peripherals"""
@@ -58,30 +62,27 @@ def reset_all():
   # initialize the display
   DISPLAY.reset()
 
-  # reset any microcontrollers
-  micros = [p for p in ALL if type(p) == Microcontroller]
-  for micro in micros:
-    micro.reset()
-    tries = 0
-    while tries < 3:
-      time.sleep(0.1)
-      try:
-        micro.get_state()
-      except:
-        tries += 1
-      else:
-        break
+  # reset the MAPLE
+  MAPLE.reset()
+  tries = 0
+  while tries < 3:
+    time.sleep(0.1)
+    try:
+      MAPLE.get_state()
+    except:
+      tries += 1
+    else:
+      break
 
   # re-initalize any mcp port expanders
-  mcps = [p for p in ALL if type(p) == MCP23017]
-  if len(mcps) > 0:
-    for mcp in mcps:
-      mcp.reset()
+  mcps = [p for p in INPUTS if type(p) == MCP23017]
+  for mcp in mcps:
+    mcp.reset()
 
   # reset any ADC devices
-  adcs = [p for p in ALL if type(p) == ADS1115]
+  adcs = [p for p in INPUTS if type(p) == ADS1115]
   if len(adcs) > 0:
-    _SMBUS.all_call_reset()
+    all_call_reset(_SMBUS)
 
     # send config to any devices
     for adc in adcs:

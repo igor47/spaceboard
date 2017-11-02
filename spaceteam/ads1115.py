@@ -61,8 +61,7 @@ class ADS1115(object):
         self.last_pin_enabled = pin
 
       # store the (raw) value into the local register
-      with self.smbus.lock_grabber():
-        self.pin_values[pin] = self._read_value()
+      self.pin_values[pin] = self._read_value()
 
   def read(self, pin, scaled = False):
     """returns ; scaled returns values from 0 to 100"""
@@ -114,14 +113,12 @@ class ADS1115(object):
     config_wire = (config_lsb << 8) + config_msb
 
     #print "write to register 0x%02x : 0x%04x (%s)" % (CONFIG_REGISTER, config_wire, format(config_wire, "#016b"))
-    with self.smbus.lock_grabber():
-      self.smbus.write_word_data(self.address, CONFIG_REGISTER, config_wire)
+    self.smbus.write_word_data(self.address, CONFIG_REGISTER, config_wire)
 
   def _read_value(self):
     """reads the raw value of the conversion register"""
     # perform the read via smbus
-    with self.smbus.lock_grabber():
-      data = self.smbus.read_word_data(self.address, CONVERSION_REGISTER)
+    data = self.smbus.read_word_data(self.address, CONVERSION_REGISTER)
 
     # linux expects to read LSB first; lets re-arrange the bytes we just got
     # at the current lsb, we have the msb

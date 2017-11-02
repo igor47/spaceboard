@@ -28,8 +28,8 @@ def main(args):
   # begin looping over them, reading their state
   client = None
   try:
-    PeripheralReader.begin_reading(peripherals.ALL)
-    time.sleep(1) # give some reader loops
+    # start communication with peripherals
+    PeripheralReader.begin_reading()
 
     # initialize an announce message
     announce = state.announce()

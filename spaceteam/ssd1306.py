@@ -27,27 +27,25 @@ class SSD1306(object):
     return ImageFont.truetype(font_path, size)
 
   def reset(self):
-    with self.smbus.lock_grabber():
-      self.device = ssd1306(bus = self.smbus, address = self.address)
-      self.device.show()
-      self._write()
+    self.device = ssd1306(bus = self.smbus, address = self.address)
+    self.device.show()
+    self._write()
 
   def communicate(self):
     if self.prev_message != self.message:
       self._write()
 
   def _write(self):
-    with self.smbus.lock_grabber():
-      with canvas(self.device) as draw:
-        draw.rectangle(self.device.bounding_box, outline="white", fill="black")
+    with canvas(self.device) as draw:
+      draw.rectangle(self.device.bounding_box, outline="white", fill="black")
 
-        # we've cleared the screen, now we write whatever is in our buffers
-        msg = self.message
-        lines = textwrap.wrap(msg, 18)
+      # we've cleared the screen, now we write whatever is in our buffers
+      msg = self.message
+      lines = textwrap.wrap(msg, 18)
 
-        y = 7
-        for line in lines:
-          draw.text((8, y), line, fill="white", font=self.font)
-          y += 14
+      y = 7
+      for line in lines:
+        draw.text((8, y), line, fill="white", font=self.font)
+        y += 14
 
-        self.prev_message = msg
+      self.prev_message = msg
