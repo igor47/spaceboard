@@ -100,4 +100,4 @@ def reset_all():
       adc.reset()
 
   DISPLAY.message = 'READY!'
-  SOUNDS.play('bootup')
+  SOUNDS.set_music('ambient')
