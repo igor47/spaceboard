@@ -75,8 +75,8 @@ yellow/red 3:
 red:
   crazy ivan:
     - pull / settle crazy ivan
-  life support:
-    - inhale / puff life support (sound: bong)
+  autopilot:
+    - engage / fire (sound: robot)
 
 passengers:
   - terminate (red) (sound: hiss)
