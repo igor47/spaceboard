@@ -26,11 +26,12 @@ INPUTS = [
       pin = 10,
       led_up_id = 5,
       led_down_id = 6,
+      sounds = {False: 'thruster'},
     ),
     'actions': {
-      'True': 'Set the first silver toggle switch in the top row to blue',
-      'False': 'Set the first silver toggle switch in the top row to orange',
-    }
+      'True': 'Deactivate thrusters',
+      'False': 'Activate thrusters!',
+    },
   },
   {
     'id': "silver_toggle_top_2",
@@ -41,8 +42,8 @@ INPUTS = [
       led_down_id = 7,
       ),
     'actions': {
-      'True': 'Set the second silver toggle switch in the top row to blue',
-      'False': 'Set the second silver toggle switch in the top row to orange',
+      'True': 'Vent the airlock!',
+      'False': 'Pressurize airlock.',
     }
   },
   {
@@ -54,8 +55,8 @@ INPUTS = [
       led_down_id = 8,
     ),
     'actions': {
-      'True': 'Set the third silver toggle switch in the top row to blue',
-      'False': 'Set the third silver toggle switch in the top row to orange',
+      'True': 'Transducer to blue',
+      'False': 'Transducer to orange',
     }
   },
   {
@@ -67,8 +68,8 @@ INPUTS = [
       led_down_id = 9,
     ),
     'actions': {
-      'True': 'Set the last silver toggle switch in the top row to blue',
-      'False': 'Set the last silver toggle switch in the top row to orange',
+      'True': 'Freeze the cryo-fan',
+      'False': 'Spin the cryo-fan',
     }
   },
   {
@@ -80,8 +81,8 @@ INPUTS = [
       led_down_id = 14,
     ),
     'actions': {
-      'True': 'Set the first silver toggle switch in the bottom row to blue',
-      'False': 'Set the first silver toggle switch in the bottom row to orange',
+      'True': 'Ungimbal the gimbal',
+      'False': 'Gimbal the gimbal',
     }
   },
   {
@@ -91,10 +92,11 @@ INPUTS = [
       pin = 8,
       led_up_id = 12,
       led_down_id = 15,
+      sounds = {False: 'spacedoor'},
     ),
     'actions': {
-      'True': 'Set the second silver toggle switch in the bottom row to blue',
-      'False': 'Set the second silver toggle switch in the bottom row to orange',
+      'True': 'Close pod bay doors',
+      'False': 'Open pod bay doors',
     }
   },
   {
@@ -104,10 +106,11 @@ INPUTS = [
       pin = 8,
       led_up_id = 11,
       led_down_id = 16,
+      sounds = {False: 'ping'},
     ),
     'actions': {
-      'True': 'Set the third silver toggle switch in the bottom row to blue',
-      'False': 'Set the third silver toggle switch in the bottom row to orange',
+      'True': 'Unping.',
+      'False': 'Ping!',
     }
   },
   {
@@ -119,8 +122,8 @@ INPUTS = [
       led_down_id = 17,
     ),
     'actions': {
-      'True': 'Set the last silver toggle switch in the bottom row to blue',
-      'False': 'Set the last silver toggle switch in the bottom row to orange',
+      'True': 'End system test',
+      'False': 'Test the system!',
     }
   },
   {
@@ -130,7 +133,7 @@ INPUTS = [
       pin = 9,
     ),
     'actions': {
-      'True': 'Push the little red pushbutton!',
+      'True': 'Ingest waste',
     },
   },
   {
@@ -140,7 +143,7 @@ INPUTS = [
       pin = 10,
     ),
     'actions': {
-      'True': 'Push the little green pushbutton!'
+      'True': 'Flush waste!'
     },
   },
   {
@@ -148,9 +151,10 @@ INPUTS = [
     'control': Switch(
       device = MCP25,
       pin = 0,
+      sounds = {False: 'warp'}
     ),
     'actions': {
-      'True': 'Push the big green pushbutton!'
+      'False': 'Engage hyperdrive!'
     },
   },
   {
@@ -158,9 +162,10 @@ INPUTS = [
     'control': Switch(
       device = MCP25,
       pin = 15,
+      sounds = {False: 'unwarp'}
     ),
     'actions': {
-      'True': 'Push the big red pushbutton!'
+      'False': 'Disengage hyperdrive!'
     },
   },
   {
@@ -168,9 +173,12 @@ INPUTS = [
     'control': SwitchWithPulldown(
       device = MCP25,
       pin = 6,
+      sounds = {True: 'robot', False: 'robot-complain'},
     ),
-    'type': 'switch',
-    'description': 'fifth red rocket toggle',
+    'actions': {
+      'True': 'Hire autopilot',
+      'False': 'Fire autopilot',
+    }
   },
   {
     'id': "red_rocket_4",
@@ -178,35 +186,46 @@ INPUTS = [
       device = MCP25,
       pin = 7,
     ),
-    'type': 'switch',
-    'description': 'fourth red rocket toggle',
+    'actions': {
+      'True': 'Pull a Crazy Ivan',
+      'False': 'Pacify Crazy Ivan',
+    }
   },
   {
     'id': "red_rocket_3",
     'control': SwitchWithPulldown(
       device = MCP24,
       pin = 1,
+      sounds = {True: 'shield-up', False: 'shield-down'},
     ),
-    'type': 'switch',
-    'description': 'third red rocket toggle',
+    'actions': {
+      'True': 'Raise shields!',
+      'False': 'Lower shields!',
+    }
   },
   {
     'id': "red_rocket_2",
     'control': SwitchWithPulldown(
       device = MCP24,
       pin = 2,
+      sounds = {True: 'siren'},
     ),
-    'type': 'switch',
-    'description': 'second red rocket toggle',
+    'actions': {
+      'True': 'Eject the pilot!',
+      'False': 'Reseat the pilot!',
+    }
   },
   {
     'id': "red_rocket_1",
     'control': SwitchWithPulldown(
       device = MCP24,
       pin = 5,
+      sounds = {False: 'explosion'},
     ),
-    'type': 'switch',
-    'description': 'first red rocket toggle',
+    'actions': {
+      'True': 'Launch missiles!',
+      'False': 'Abort missile launch!',
+    }
   },
   {
     'id': "yellow_rocket_3",
@@ -214,8 +233,10 @@ INPUTS = [
       device = MCP24,
       pin = 0,
     ),
-    'type': 'switch',
-    'description': 'last yellow rocket toggle',
+    'actions': {
+      'True': 'Modulate the shields',
+      'False': 'Demodulate the shields!',
+    }
   },
   {
     'id': "yellow_rocket_2",
@@ -223,8 +244,10 @@ INPUTS = [
       device = MCP24,
       pin = 3,
     ),
-    'type': 'switch',
-    'description': 'second yellow rocket toggle',
+    'actions': {
+      'True': 'Eject cargo!',
+      'False': 'Uneject cargo!'
+    }
   },
   {
     'id': "yellow_rocket_1",
@@ -232,8 +255,10 @@ INPUTS = [
       device = MCP24,
       pin = 6,
     ),
-    'type': 'switch',
-    'description': 'first yellow rocket toggle',
+    'actions': {
+      'True': 'Arm the missiles',
+      'False': 'Disarm the missiles'
+    }
   },
   {
     'id': "red_rocker_1",
@@ -241,8 +266,10 @@ INPUTS = [
       device = MCP25,
       pin = 2,
     ),
-    'type': 'switch',
-    'description': 'first red rocker',
+    'actions': {
+      'True': 'Activate plasma containment',
+      'False': 'Uncontain the plasma'
+    }
   },
   {
     'id': "red_rocker_2",
@@ -250,8 +277,10 @@ INPUTS = [
       device = MCP25,
       pin = 1,
     ),
-    'type': 'switch',
-    'description': 'second red rocker',
+    'actions': {
+      'True': 'Phase-shift the plasma',
+      'False': 'Phase-lock the plasma'
+    }
   },
   {
     'id': "red_rocker_3",
@@ -259,8 +288,10 @@ INPUTS = [
       device = MCP25,
       pin = 4,
     ),
-    'type': 'switch',
-    'description': 'third red rocker',
+    'actions': {
+      'True': 'Intercool the plasma',
+      'False': 'Disable plasma intercool',
+    }
   },
   {
     'id': "red_rocker_4",
@@ -268,8 +299,10 @@ INPUTS = [
       device = MCP25,
       pin = 3,
     ),
-    'type': 'switch',
-    'description': 'last red rocker',
+    'actions': {
+      'True': 'Discharge plasma',
+      'False': 'Un-Discharge plasma',
+    }
   },
   {
     'id': "green_rocker_1",
@@ -277,8 +310,10 @@ INPUTS = [
       device = MCP25,
       pin = 8,
     ),
-    'type': 'switch',
-    'description': 'first green rocker',
+    'actions': {
+      'True': 'Power to level 10',
+      'False': 'Shut off power to level 10',
+    }
   },
   {
     'id': "green_rocker_2",
@@ -286,8 +321,10 @@ INPUTS = [
       device = MCP25,
       pin = 10,
     ),
-    'type': 'switch',
-    'description': 'second green rocker',
+    'actions': {
+      'True': 'Power to broom closet!',
+      'False': 'Turn off power to broom closet!',
+    }
   },
   {
     'id': "green_rocker_3",
@@ -295,8 +332,10 @@ INPUTS = [
       device = MCP25,
       pin = 9,
     ),
-    'type': 'switch',
-    'description': 'third green rocker',
+    'actions': {
+      'True': 'Activate auxillary power!',
+      'False': 'Switch to mains power!',
+    }
   },
   {
     'id': "green_rocker_4",
@@ -304,8 +343,10 @@ INPUTS = [
       device = MCP25,
       pin = 12,
     ),
-    'type': 'switch',
-    'description': 'last green rocker',
+    'actions': {
+      'True': 'Power to enemy ships',
+      'False': 'Stop powering enemy ships!',
+    }
   },
   {
     'id': "blue_rocker_1",
@@ -313,8 +354,10 @@ INPUTS = [
       device = MCP25,
       pin = 5,
     ),
-    'type': 'switch',
-    'description': 'first blue rocker',
+    'actions': {
+      'True': 'Chill the coolant',
+      'False': 'Warm the coolant',
+    }
   },
   {
     'id': "blue_rocker_2",
@@ -322,8 +365,10 @@ INPUTS = [
       device = MCP25,
       pin = 14,
     ),
-    'type': 'switch',
-    'description': 'second blue rocker',
+    'actions': {
+      'True': 'Vent coolant!',
+      'False': 'Inspire coolant!',
+    }
   },
   {
     'id': "blue_rocker_3",
@@ -331,8 +376,10 @@ INPUTS = [
       device = MCP25,
       pin = 11,
     ),
-    'type': 'switch',
-    'description': 'third blue rocker',
+    'actions': {
+      'True': 'Stir coolant',
+      'False': 'Congeal coolant',
+    }
   },
   {
     'id': "blue_rocker_4",
@@ -340,17 +387,20 @@ INPUTS = [
       device = MCP25,
       pin = 13,
     ),
-    'type': 'switch',
-    'description': 'last blue rocker',
+    'actions': {
+      'True': 'Pump coolant',
+      'False': 'Leak coolant',
+    }
   },
   {
     'id': "red_arcade_2",
     'control': Switch(
       device = MCP24,
       pin = 4,
+      sounds = {True: 'ka-ching',},
     ),
     'actions': {
-      'True': 'Push the second red arcade button!'
+      'True': 'Invoice passengers!'
     },
   },
   {
@@ -360,7 +410,7 @@ INPUTS = [
       pin = 7,
     ),
     'actions': {
-      'True': 'Push the first red arcade button!'
+      'True': 'Terminate passengers',
     },
   },
   {
@@ -370,7 +420,7 @@ INPUTS = [
       pin = 9,
     ),
     'actions': {
-      'True': 'Push the second white arcade button!'
+      'True': 'Hoard the power!',
     },
   },
   {
@@ -380,7 +430,7 @@ INPUTS = [
       pin = 8,
     ),
     'actions': {
-      'True': 'Push the first white arcade button!'
+      'True': 'Abuse power!',
     },
   },
   {
@@ -390,7 +440,7 @@ INPUTS = [
       pin = 15,
     ),
     'actions': {
-      'True': 'Push the second yellow arcade button!'
+      'True': 'Sedate passengers',
     },
   },
   {
@@ -400,7 +450,7 @@ INPUTS = [
       pin = 12,
     ),
     'actions': {
-      'True': 'Push the first yellow arcade button!'
+      'True': 'Sedate passengers!',
     },
   },
   {
@@ -408,9 +458,10 @@ INPUTS = [
     'control': Switch(
       device = MCP24,
       pin = 11,
+      sounds = {False: 'laser'}
     ),
     'actions': {
-      'True': 'Push the second blue arcade button!'
+      'True': 'Fire lasers!',
     },
   },
   {
@@ -418,9 +469,10 @@ INPUTS = [
     'control': Switch(
       device = MCP24,
       pin = 10,
+      sounds = {False: 'horn'}
     ),
     'actions': {
-      'True': 'Push the first blue arcade button!'
+      'True': 'Honk the spacehorn!',
     },
   },
   {
@@ -430,7 +482,7 @@ INPUTS = [
       pin = 14,
     ),
     'actions': {
-      'True': 'Push the second green arcade button!'
+      'True': 'Feed the passengers',
     },
   },
   {
@@ -440,7 +492,7 @@ INPUTS = [
       pin = 13,
     ),
     'actions': {
-      'True': 'Push the first green arcade button!'
+      'True': 'Brew tea!',
     },
   },
   {
@@ -493,7 +545,7 @@ INPUTS = [
           }),
       ],
     ),
-    'actions': {"%03d" % n: "Set the keypad to %d!" % n for n in xrange(999)}
+    'actions': {"%03d" % n: "Set course to %d!" % n for n in xrange(999)}
   },
   {
     'id': 'Accelerator',
@@ -506,13 +558,6 @@ INPUTS = [
     'actions': {str(n): "Set throttle to %d!" % n for n in xrange(15)}
   }
 ]
-
-for i in INPUTS:
-  if 'type' in i and i['type'] == 'switch':
-    i['actions'] = {
-      'True': "Set the %s to ON" % i['description'],
-      'False': "Set the %s to OFF" % i['description'],
-    }
 
 def announce(inputs = INPUTS):
   controls = []

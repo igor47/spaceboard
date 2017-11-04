@@ -8,9 +8,10 @@ from colour import Color
 import time
 
 class Switch(object):
-  def __init__(self, device, pin):
+  def __init__(self, device, pin, sounds = None):
     self.device = device
     self.pin = pin
+    self.sounds = sounds
 
     self.prev_value = None
     self.value = None
@@ -23,23 +24,34 @@ class Switch(object):
   def read(self):
     self.prev_value = self.value
     self.value = self.device.read(self.pin)
+    self.play_sound()
+
     self.after_read()
+
+  def play_sound(self):
+    if self.prev_value != self.value:
+      try:
+        sound = self.sounds[self.value]
+      except:
+        pass
+      else:
+        peripherals.SOUNDS.play(sound)
 
   def after_read(self):
     pass
 
 class SwitchWithPulldown(Switch):
   """Like a normal switch, but disables the pull-up on an MCP"""
-  def __init__(self, device, pin):
-    Switch.__init__(self, device, pin)
+  def __init__(self, device, pin, sounds = None):
+    Switch.__init__(self, device, pin, sounds)
     device.pullups[pin] = 0
 
 class SwitchWithLight(Switch):
   ACTIVE_COLOR = Color("green")
   INACTIVE_COLOR = Color("orange")
 
-  def __init__(self, device, pin, led_id):
-    Switch.__init__(self, device, pin)
+  def __init__(self, device, pin, led_id, sounds = None):
+    Switch.__init__(self, device, pin, sounds)
 
     self.led_id = led_id
     self.prev_color = None
@@ -61,8 +73,8 @@ class SwitchWithTwoLights(Switch):
   DOWN_ON_COLOR = Color(rgb = (0, 0.2, 0.4))
   DOWN_OFF_COLOR = Color(rgb = (0, 0.025, 0.05))
 
-  def __init__(self, device, pin, led_up_id, led_down_id):
-    Switch.__init__(self, device, pin)
+  def __init__(self, device, pin, led_up_id, led_down_id, sounds = None):
+    Switch.__init__(self, device, pin, sounds)
     self.led_up_id = led_up_id
     self.led_down_id = led_down_id
 

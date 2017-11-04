@@ -85,7 +85,7 @@ passengers:
   - sedate    (yellow)
   - invoice   (red) (sound: coins/ka-ching)
 spacehorn:
-  - honk (blue)
+  - honk (blue) (sound: honk)
 
 power:
   - abuse (white)
