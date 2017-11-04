@@ -49,7 +49,7 @@ class SoundPlayer(object):
       if not channel.get_busy():
         self.channels.remove(channel)
 
-  def set_music(self, name, volume = 0.4):
+  def set_music(self, name, volume = 1):
     if name is None:
       pg.mixer.music.fadeout(1)
     else:
