@@ -9,8 +9,8 @@ from spaceteam import state
 import time
 import sdnotify
 
-#SERVER_IP = '10.110.0.10'
-SERVER_IP = '10.0.0.1'
+SERVER_IP = '10.110.0.10'
+#SERVER_IP = '10.0.0.1'
 
 def updates(prev, new):
   diffs = {}

@@ -68,13 +68,11 @@ class Client:
       if msg['message'] == 'set-display':
         return {'type': 'display', 'message': msg['data']['message']}
 
-      if msg['message'] == 'set-status':
-        try:
-          status = msg['data']['message']
-          return {'type': 'status', 'message': status}
-        except KeyError:
-          status = msg['data']['progress']
-          return {'type': 'progress', 'message': status}
+      elif msg['message'] == 'set-status':
+        return {'type': 'status', 'message': msg['data']['message']}
+
+      elif msg['message'] == 'set-progress':
+        return {'type': 'progress', 'message': msg['data']['value']}
 
     while not self.recv_stop.isSet():
       self.read_buffer += self._socket.recv(4096)
