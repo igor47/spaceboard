@@ -5,6 +5,7 @@ Contains and manages the current state of the game
 
 from peripherals import *
 from controls import *
+from seven_segment import SevenSegment
 
 INPUTS = [
   {
@@ -444,20 +445,54 @@ INPUTS = [
   },
   {
     'id': 'keypad',
-    'control': Keypad({
-      1: KeypadButton(MCP27, pin = 15, led_id = 18),
-      2: KeypadButton(MCP27, pin = 14, led_id = 25),
-      3: KeypadButton(MCP27, pin = 13, led_id = 26),
-      4: KeypadButton(MCP27, pin = 12, led_id = 19),
-      5: KeypadButton(MCP27, pin = 0, led_id = 24),
-      6: KeypadButton(MCP27, pin = 1, led_id = 27),
-      7: KeypadButton(MCP27, pin = 2, led_id = 20),
-      8: KeypadButton(MCP27, pin = 3, led_id = 23),
-      9: KeypadButton(MCP27, pin = 4, led_id = 28),
-      0: KeypadButton(MCP27, pin = 6, led_id = 22),
-      'input': KeypadButton(MCP27, pin = 5, led_id = 21),
-      'ok': KeypadButton(MCP27, pin = 7, led_id = 29),
-    }),
+    'control': Keypad(
+      buttons = {
+        1: KeypadButton(MCP27, pin = 15, led_id = 18),
+        2: KeypadButton(MCP27, pin = 14, led_id = 25),
+        3: KeypadButton(MCP27, pin = 13, led_id = 26),
+        4: KeypadButton(MCP27, pin = 12, led_id = 19),
+        5: KeypadButton(MCP27, pin = 0, led_id = 24),
+        6: KeypadButton(MCP27, pin = 1, led_id = 27),
+        7: KeypadButton(MCP27, pin = 2, led_id = 20),
+        8: KeypadButton(MCP27, pin = 3, led_id = 23),
+        9: KeypadButton(MCP27, pin = 4, led_id = 28),
+        0: KeypadButton(MCP27, pin = 6, led_id = 22),
+        'input': KeypadButton(MCP27, pin = 5, led_id = 21),
+        'ok': KeypadButton(MCP27, pin = 7, led_id = 29),
+      },
+      displays = [
+        SevenSegment({
+          'dot': (MCP22, 6),
+          'top': (MCP23, 6),
+          'left_top': (MCP22, 7),
+          'left_bottom': (MCP22, 5),
+          'right_top': (MCP23, 4),
+          'right_bottom': (MCP22, 9),
+          'middle': (MCP22, 13),
+          'bottom': (MCP22, 3),
+          }),
+        SevenSegment({
+          'dot': (MCP22, 8),
+          'top': (MCP23, 2),
+          'left_top': (MCP22, 11),
+          'left_bottom': (MCP23, 11),
+          'right_top': (MCP23, 3),
+          'right_bottom': (MCP23, 12),
+          'middle': (MCP23, 8),
+          'bottom': (MCP23, 13),
+          }),
+        SevenSegment({
+          'dot': (MCP22, 2),
+          'top': (MCP23, 7),
+          'left_top': (MCP22, 10),
+          'left_bottom': (MCP23, 10),
+          'right_top': (MCP23, 9),
+          'right_bottom': (MCP22, 12),
+          'middle': (MCP23, 5),
+          'bottom': (MCP22, 4),
+          }),
+      ],
+    ),
     'actions': {"%03d" % n: "Set the keypad to %d!" % n for n in xrange(999)}
   },
   {

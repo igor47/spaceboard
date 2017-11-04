@@ -109,13 +109,16 @@ class Keypad(object):
   BLINK_COLOR = Color("blue")
   BLINK_INTERVAL_SEC = 0.5
 
-  def __init__(self, buttons):
+  def __init__(self, buttons, displays):
     # did we get the buttons we require?
     provided = set(buttons.keys())
     if provided != self.REQUIRED_KEYS:
       raise RuntimeError(
           "Keypad requires a dictionary of buttons with exactly keys %s, but %s was provided" % (
             self.REQUIRED_KEYS, provided))
+
+    # save ref to displays
+    self.displays = displays
 
     # save and initialize callbacks on key press
     self.buttons = buttons
@@ -131,6 +134,7 @@ class Keypad(object):
     self.set_button_colors()
 
     # what should we be displaying right now?
+    self.last_display = None
     self.display = ['H', 'E', 'H']
     self.value = 0
 
@@ -207,9 +211,17 @@ class Keypad(object):
     # set the button colors based on the current mode
     self.set_button_colors()
 
+    # make sure the display is correct
+    self.set_display()
+
     # now lets read the inputs; that will set colors if necessary
     for btn in self.buttons.values():
       btn.read()
+
+  def set_display(self):
+    for idx, char in enumerate(self.display):
+      d = self.displays[idx]
+      d.display(char)
 
 class Analog(object):
   CHANGE_THRESHOLD = 2
