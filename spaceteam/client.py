@@ -14,6 +14,7 @@ DEFAULT_PORT = 8000
 
 class Client:
   """Handles communication with the server and polling state updates."""
+  KEEPALIVE_THRESH_SEC = 10
 
   def __init__(self, host, port = DEFAULT_PORT):
     """initialize comms"""
@@ -26,6 +27,8 @@ class Client:
     self.recv_thread = None
     self.recv_stop = threading.Event()
     self.recv_events = Queue.Queue()
+
+    self.last_keepalive = time.time()
 
   def start(self, announce):
     self._socket.connect((self.host, self.port))
@@ -52,7 +55,11 @@ class Client:
       return None
 
   def running(self):
-    return (self.recv_thread and self.recv_thread.is_alive())
+    recv_thread_alive = self.recv_thread and self.recv_thread.is_alive()
+    keepalive_happening = (time.time() - self.last_keepalive) < self.KEEPALIVE_THRESH_SEC
+    running = recv_thread_alive and keepalive_happening
+
+    return running
 
   def _send(self, message, data):
     """encodes and sends a message to the server"""
@@ -73,6 +80,9 @@ class Client:
 
       elif msg['message'] == 'set-progress':
         return {'type': 'progress', 'message': msg['data']['value']}
+
+      elif msg['message'] == 'keep-alive':
+        self.last_keepalive = time.time()
 
     while not self.recv_stop.isSet():
       self.read_buffer += self._socket.recv(4096)
