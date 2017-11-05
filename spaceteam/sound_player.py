@@ -46,7 +46,7 @@ class SoundPlayer(object):
 
   def clean_up_channels(self):
     for channel in self.channels:
-      if not channel.get_busy():
+      if channel and not channel.get_busy():
         self.channels.remove(channel)
 
   def set_music(self, name, volume = 1.2):
