@@ -333,8 +333,8 @@ INPUTS = [
       pin = 9,
     ),
     'actions': {
-      'True': 'Activate auxillary power!',
-      'False': 'Switch to mains power!',
+      'True': 'Abuse more power',
+      'False': 'Abuse power',
     }
   },
   {
