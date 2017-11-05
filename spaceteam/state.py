@@ -418,9 +418,10 @@ INPUTS = [
     'control': Switch(
       device = MCP24,
       pin = 9,
+      sounds = {True: 'makeitso'},
     ),
     'actions': {
-      'True': 'Hoard the power!',
+      'True': 'Make it so!',
     },
   },
   {
