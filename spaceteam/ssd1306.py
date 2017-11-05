@@ -7,6 +7,8 @@ import os
 import textwrap
 import time
 
+from utils import *
+
 class SSD1306(object):
   FONT = 'inconsolata.ttf'
   FONT_SIZE = 12
@@ -43,6 +45,7 @@ class SSD1306(object):
     if self.prev_message != self.message:
       self._write()
 
+  @retry_i2c
   def _write(self):
     # we have an unexpired status -- leave it on the screen
     if self.status_expires and time.time() < self.status_expires:

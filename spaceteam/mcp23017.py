@@ -108,10 +108,12 @@ class MCP23017(object):
       self.inputs[pin] = 1
       self.mode_changed = True
 
+  @retry_i2c
   def _set_iocon(self):
     """set the controls we want for the rest of our interactions with the chip"""
     self.smbus.write_byte_data(self.address, IOCON_ADDR, bitlist_to_int(DESIRED_IOCON))
 
+  @retry_i2c
   def _set_pin_modes(self):
     """configure pins as either inputs or outputs"""
     self.mode_changed = False
@@ -124,6 +126,7 @@ class MCP23017(object):
         IODIRB_ADDR,
         bitlist_to_int(self.inputs[8:16]))
 
+  @retry_i2c
   def _write_output_latches(self):
     """for output pins, sets their output value from internal state"""
     self.output_latches_changed = False
@@ -136,6 +139,7 @@ class MCP23017(object):
         OLATB_ADDR,
         bitlist_to_int(self.output_latches[8:16]))
 
+  @retry_i2c
   def _read_inputs(self):
     """Reads the state of input pins into a local register
 
@@ -155,6 +159,7 @@ class MCP23017(object):
 
     self.input_latches = bits
 
+  @retry_i2c
   def _enable_pullups(self):
     """Enable pull-up resistors on all input pins"""
     self.smbus.write_byte_data(

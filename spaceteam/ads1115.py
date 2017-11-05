@@ -94,6 +94,7 @@ class ADS1115(object):
     """reset; really, this just means writing a config"""
     self._write_config()
 
+  @retry_i2c
   def _write_config(self, enabled_pin = 0):
     """set the controls we want for the rest of our interactions with the chip"""
     # lets make a copy of the default config
@@ -118,6 +119,7 @@ class ADS1115(object):
     #print "write to register 0x%02x : 0x%04x (%s)" % (CONFIG_REGISTER, config_wire, format(config_wire, "#016b"))
     self.smbus.write_word_data(self.address, CONFIG_REGISTER, config_wire)
 
+  @retry_i2c
   def _read_value(self):
     """reads the raw value of the conversion register"""
     # perform the read via smbus

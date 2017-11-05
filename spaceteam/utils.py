@@ -11,3 +11,14 @@ def bitlist_to_int(bitlist):
 
   return out
 
+def retry_i2c(func):
+  def wrapper(*args, **kwargs):
+    tries = 0
+    while tries < 3:
+      tries += 1
+      try:
+        return func(*args, **kwargs)
+      except IOError, e:
+        print "retrying on io error %s for the %s time" % (e, tries)
+
+  return wrapper
