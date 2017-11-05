@@ -429,9 +429,10 @@ INPUTS = [
     'control': Switch(
       device = MCP24,
       pin = 8,
+      sounds = {True: 'modem'},
     ),
     'actions': {
-      'True': 'Abuse power!',
+      'True': 'Enter cyberspace!',
     },
   },
   {
