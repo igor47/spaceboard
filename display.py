@@ -9,4 +9,3 @@ import time
 while True:
   peripherals.DISPLAY.message = 'Unix time is %s' % time.time()
   peripherals.DISPLAY.communicate()
-  time.sleep(1)

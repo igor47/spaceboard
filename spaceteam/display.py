@@ -49,6 +49,8 @@ class Display(object):
       return
 
     with canvas(self.device) as draw:
+      draw.fontmode = "1"
+
       # clear the screen by drawing a box over everything
       draw.rectangle(self.device.bounding_box, outline="white", fill="black")
 
