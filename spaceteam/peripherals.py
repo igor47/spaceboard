@@ -3,14 +3,17 @@
 Initializes and provides access to board peripherals
 """
 
+import atexit
 import smbus
 import time
 
 # initialize GPIO
-import wiringpi
-wiringpi.wiringPiSetup()
+import RPi.GPIO as GPIO
+GPIO.setmode(GPIO.BOARD)
+atexit.register(GPIO.cleanup)
 
-RESET_PIN = 27
+# all pin numbers are BOARD
+RESET_PIN = 36
 
 # handling i2c resets
 I2C_ALL_CALL = 0x0 # all call address -- goes to all devices (that support it)
@@ -46,8 +49,15 @@ INPUTS = [
 from microcontroller import Microcontroller
 MAPLE = Microcontroller("/dev/serial0")
 
-from ssd1306 import SSD1306
-DISPLAY = SSD1306(_SMBUS)
+# display pins and setup
+DISPLAY_DC_PIN = 29           # harness pin 3 (1 is PWR, 2 is GND)
+DISPLAY_SCLK_PIN = 23         # pin 4
+DISPLAY_MOSI_PIN = 19         # pin 5  these pins are port 0
+DISPLAY_CE_PIN = 24           # harness pin 6; this is CE0, so we get device 0
+DISPLAY_RESET_PIN = RESET_PIN # pin 7; we pass NONE to device since we do reset ourselves
+
+from ssd1325 import SSD1325
+DISPLAY = SSD1325(gpio = GPIO, gpio_DC = 29, gpio_RESET = None)
 
 from progress import Progress
 PROGRESS = Progress(MAPLE)
@@ -69,10 +79,10 @@ def read_all():
 def reset_all():
   """resets all peripherals"""
   # start by toggling the reset pin
-  wiringpi.pinMode(RESET_PIN, wiringpi.OUTPUT)
-  wiringpi.digitalWrite(RESET_PIN, 0)
+  GPIO.setup(RESET_PIN, GPIO.OUT)
+  GPIO.output(RESET_PIN, 0)
   time.sleep(0.1)
-  wiringpi.digitalWrite(RESET_PIN, 1)
+  GPIO.output(RESET_PIN, 1)
 
   # initialize the display
   DISPLAY.reset()
