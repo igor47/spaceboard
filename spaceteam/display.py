@@ -12,7 +12,7 @@ class Display(object):
   FONT_SIZE = 12
   STATUS_TIME_SEC = 2 # how long to display status messages
 
-  def __init__(self)
+  def __init__(self):
     self.prev_message = None
     self.message = "Initializing navigation...."
 

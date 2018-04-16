@@ -6,8 +6,8 @@ from utils import *
 from display import Display
 
 class SSD1325(Display):
-  def __init__(self, gpio, gpio_DC, gpio_RESET, port = 0, device = 0):
-    Display.init(self)
+  def __init__(self, gpio, gpio_DC, gpio_RST, port = 0, device = 0):
+    Display.__init__(self)
 
     self.port = port
     self.device = device
@@ -16,7 +16,7 @@ class SSD1325(Display):
         port = self.port,
         device = self.device,
         gpio_DC = gpio_DC,
-        gpio_RESET = gpio_RESET)
+        gpio_RST = gpio_RST)
 
     self.device = self.get_device()
 

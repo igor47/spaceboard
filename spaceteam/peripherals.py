@@ -57,7 +57,7 @@ DISPLAY_CE_PIN = 24           # harness pin 6; this is CE0, so we get device 0
 DISPLAY_RESET_PIN = RESET_PIN # pin 7; we pass NONE to device since we do reset ourselves
 
 from ssd1325 import SSD1325
-DISPLAY = SSD1325(gpio = GPIO, gpio_DC = 29, gpio_RESET = None)
+DISPLAY = SSD1325(gpio = GPIO, gpio_DC = 29, gpio_RST = None)
 
 from progress import Progress
 PROGRESS = Progress(MAPLE)
