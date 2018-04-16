@@ -76,13 +76,15 @@ def read_all():
   for p in ALL:
     p.communicate()
 
-def reset_all():
-  """resets all peripherals"""
-  # start by toggling the reset pin
+def toggle_reset():
   GPIO.setup(RESET_PIN, GPIO.OUT)
   GPIO.output(RESET_PIN, 0)
   time.sleep(0.1)
   GPIO.output(RESET_PIN, 1)
+
+def reset_all():
+  """resets all peripherals"""
+  toggle_reset()
 
   # initialize the display
   DISPLAY.reset()
