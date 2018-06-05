@@ -32,7 +32,7 @@ class Client:
 
   def start(self, announce):
     self._socket.connect((self.host, self.port))
-    self._send('announce', announce)
+    self._send('announce', {'controls': announce})
 
     # start the reader thread
     self.recv_thread = threading.Thread(target = self._reader)

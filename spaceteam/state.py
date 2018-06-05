@@ -572,7 +572,7 @@ def announce(inputs = INPUTS):
       }
     controls.append(c)
 
-  return {'controls': controls}
+  return controls
 
 def generate(inputs = INPUTS):
   state = {}
