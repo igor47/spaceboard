@@ -25,6 +25,10 @@ def all_call_reset(bus):
 BUS_ID = 1
 _SMBUS = smbus.SMBus(BUS_ID)
 
+# these pins are not used in the code, just here for reference
+SMBUS_SDA_PIN = 03
+SMBUS_SCL_PIN = 05
+
 from ads1115 import ADS1115
 ANALOG1 = ADS1115(_SMBUS, 0x48)
 
@@ -46,8 +50,13 @@ INPUTS = [
     ANALOG1,
     ]
 
+# initialize microcontroller
 from microcontroller import Microcontroller
 MAPLE = Microcontroller("/dev/serial0")
+
+# these pins are not used in the code, just here for reference
+MICROCONTROLLER_TX_PIN = 8
+MICROCONTROLLER_RX_PIN = 10
 
 # display pins and setup
 DISPLAY_DC_PIN = 29           # harness pin 3 (1 is PWR, 2 is GND)
@@ -62,10 +71,19 @@ DISPLAY = SSD1325(gpio = GPIO, gpio_DC = 29, gpio_RST = None)
 from progress import Progress
 PROGRESS = Progress(MAPLE)
 
+# the non-rgb LEDS on shift-register drivers
+LED_DATA_PIN = 33
+LED_CLOCK_PIN = 35
+LED_LATCH_PIN = 37
+
+from max6971 import MAX6971
+LEDS = MAX6971(LED_DATA_PIN, LED_CLOCK_PIN, LED_LATCH_PIN, count = 2)
+
 OUTPUTS = [
     PROGRESS,
     MAPLE,
     DISPLAY,
+    LEDS,
     ]
 
 from sound_player import SoundPlayer
