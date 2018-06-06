@@ -72,12 +72,12 @@ from progress import Progress
 PROGRESS = Progress(MAPLE)
 
 # the non-rgb LEDS on shift-register drivers
-LED_DATA_PIN = 33
-LED_CLOCK_PIN = 35
-LED_LATCH_PIN = 37
+LED_DATA_PIN = 12
+LED_CLOCK_PIN = 18
+LED_LATCH_PIN = 22
 
 from max6971 import MAX6971
-LEDS = MAX6971(LED_DATA_PIN, LED_CLOCK_PIN, LED_LATCH_PIN, count = 2)
+LEDS = MAX6971(LED_DATA_PIN, LED_CLOCK_PIN, LED_LATCH_PIN, count = 5)
 
 OUTPUTS = [
     PROGRESS,
