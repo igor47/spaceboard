@@ -71,19 +71,10 @@ DISPLAY = SSD1325(gpio = GPIO, gpio_DC = 29, gpio_RST = None)
 from progress import Progress
 PROGRESS = Progress(MAPLE)
 
-# the non-rgb LEDS on shift-register drivers
-LED_DATA_PIN = 12
-LED_CLOCK_PIN = 18
-LED_LATCH_PIN = 22
-
-from max6971 import MAX6971
-LEDS = MAX6971(LED_DATA_PIN, LED_CLOCK_PIN, LED_LATCH_PIN, count = 5)
-
 OUTPUTS = [
     PROGRESS,
     MAPLE,
     DISPLAY,
-    LEDS,
     ]
 
 from sound_player import SoundPlayer

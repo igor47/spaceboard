@@ -47,7 +47,7 @@ Adafruit_NeoPixel strip = Adafruit_NeoPixel(LED_COUNT, LED_STRIP_PIN, NEO_GRB + 
 #define ARRAY_CLOCK_PIN 30
 #define ARRAY_LATCH_PIN 31
 #define ARRAY_COUNT 80
-uint8_t array_bytes[(ARRAY_COUNT / 8) + 1] = {0};
+uint8_t array_bytes[(ARRAY_COUNT >> 3) + 1] = {0};
 
 static const uint32_t BaudRate = 115200;  // baud
 static PacketSerial packetSerial;
@@ -116,6 +116,7 @@ void onPacket(const uint8_t* buffer, size_t size)
       break;
     // LATCH: forces a display of the led strip
     case 'L':
+      arraySend();
       strip.show();
       break;
     // CLEAR: resets all of the leds
@@ -152,17 +153,23 @@ void onPacket(const uint8_t* buffer, size_t size)
         for (unsigned int i = 1; i < size; i++) {
           array_bytes[i-1] = buffer[i];
         }
-        arraySend();
       } else {
         state.badCommandsReceived++;
       }
       break;
 
-    // SINGLE<bit>,<val> sets a specific led in the array to value
-    case 'S':
-      if(size == 3) {
-        arrayWriteBit((uint8_t)buffer[1], (bool)buffer[2]);
-        arraySend();
+    // ON<bit> turns on an led in the array
+    case '1':
+      if(size == 2) {
+        arrayWriteBit(buffer[1], 1);
+      } else {
+        state.badCommandsReceived++;
+      }
+      break;
+    // OFF<bit> turns on an led in the array
+    case '0':
+      if(size == 2) {
+        arrayWriteBit(buffer[1], 0);
       } else {
         state.badCommandsReceived++;
       }
@@ -249,27 +256,24 @@ bool arrayReadBit(uint8_t bit) {
 
 void arrayWriteBit(uint8_t bit, bool val) {
   uint8_t bit_set = 1 << bit % 8;
-  if (!val)
-    bit_set = ~bit_set;
-
-  array_bytes[bit >> 3] &= bit_set;
+  if (val)
+    array_bytes[bit >> 3] |= bit_set;
+  else
+    array_bytes[bit >> 3] &= ~bit_set;
 }
 
 void arraySend() {
   for(uint8_t bit = 0; bit < ARRAY_COUNT; bit++) {
     // put the data on the wire
     digitalWrite(ARRAY_DATA_PIN, arrayReadBit(bit));
-    delay(1);
 
     // clock the data into the shift register
     digitalWrite(ARRAY_CLOCK_PIN, HIGH);
-    delay(1);
     digitalWrite(ARRAY_CLOCK_PIN, LOW);
   }
 
   // now latch the data to the output
   digitalWrite(ARRAY_LATCH_PIN, HIGH);
-  delay(1);
   digitalWrite(ARRAY_LATCH_PIN, LOW);
 }
 
