@@ -150,6 +150,11 @@ class Microcontroller(object):
 
     self.latch_now_or_later(latch)
 
+  def set_array_led(self, number, val):
+    """Sets a specific LED in the array"""
+    command = ["S", number, 1 if val else 0]
+    self._send_command(command)
+
   def set_led_batch(self, first_led, colors = [], latch = False):
     """Sets all specified colors"""
     group_size = 10 # we will set up to 10 leds at once
