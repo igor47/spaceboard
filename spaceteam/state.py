@@ -38,7 +38,7 @@ INPUTS = [
       pin = 8,
     ),
     'actions': {
-      'True': 'Deploy chute!',
+      'False': 'Deploy chute!',
     },
   },
   {
@@ -108,6 +108,17 @@ INPUTS = [
     }
   },
   {
+    'id': "airlock_rocker_2",
+    'control': SwitchWithPulldown(
+      device = MCP20,
+      pin = 2,
+    ),
+    'actions': {
+      'True': 'Open inner airlock door.',
+      'False': 'Close inner airlock door!',
+    }
+  },
+  {
     'id': "airlock_rocker_3",
     'control': SwitchWithPulldown(
       device = MCP20,
@@ -118,9 +129,8 @@ INPUTS = [
       'False': 'Vent the airlock.',
     }
   },
-
   {
-    'id': "red_arcade_top",
+    'id': "nuke_arcade",
     'control': Switch(
       device = MCP20,
       pin = 0,
@@ -130,13 +140,242 @@ INPUTS = [
     },
   },
   {
-    'id': "red_arcade_missles",
+    'id': "nuke_key",
+    'control': Switch(
+      device = MCP20,
+      pin = 7,
+    ),
+    'actions': {
+      'True': 'Hasten nuclear apocalypse',
+      'False': 'Stand down from nuclear apocalypse',
+    },
+  },
+
+  {
+    'id': "weapons_red_arcade",
     'control': Switch(
       device = MCP20,
       pin = 5,
     ),
     'actions': {
-      'True': 'Fire ze missiles!',
+      'False': 'Fire ze missiles!',
+    },
+  },
+  {
+    'id': "weapons_yellow_arcade",
+    'control': Switch(
+      device = MCP21,
+      pin = 14,
+    ),
+    'actions': {
+      'False': 'Fire lasers!',
+    },
+  },
+  {
+    'id': "weapons_white_aracde",
+    'control': Switch(
+      device = MCP21,
+      pin = 0,
+    ),
+    'actions': {
+      'False': 'Chaff!',
+    },
+  },
+
+  {
+    'id': "manuevers_yellow_arcade",
+    'control': Switch(
+      device = MCP21,
+      pin = 4,
+    ),
+    'actions': {
+      'False': 'Pu1l a CraZy IvaN.',
+    },
+  },
+  {
+    'id': "manuevers_green_arcade",
+    'control': Switch(
+      device = MCP21,
+      pin = 1,
+    ),
+    'actions': {
+      'False': 'Evasive manuevers!',
+    },
+  },
+  {
+    'id': "manuevers_blue_arcade",
+    'control': Switch(
+      device = MCP21,
+      pin = 2,
+    ),
+    'actions': {
+      'False': 'Do a barrel roll!',
+    },
+  },
+
+  {
+    'id': "misc_white_arcade",
+    'control': Switch(
+      device = MCP21,
+      pin = 5,
+    ),
+    'actions': {
+      'False': 'Dump waste!',
+    },
+  },
+  {
+    'id': "misc_green_arcade",
+    'control': Switch(
+      device = MCP21,
+      pin = 1,
+    ),
+    'actions': {
+      'False': 'Green button next to "dump waste"',
+    },
+  },
+
+  {
+    'id': "silver_toggle_top_1",
+    'control': Switch(
+      device = MCP27,
+      pin = 15,
+    ),
+    'actions': {
+      'True': 'Freeze the cryofan',
+      'False': 'Spin the cryofan',
+    },
+  },
+  {
+    'id': "silver_toggle_top_2",
+    'control': Switch(
+      device = MCP27,
+      pin = 15,
+    ),
+    'actions': {
+      'False': 'Transduce the transducer!',
+      'True': 'Untransduce!',
+    },
+  },
+  {
+    'id': "silver_toggle_top_3",
+    'control': Switch(
+      device = MCP27,
+      pin = 13,
+    ),
+    'actions': {
+      'True': 'Close pod bay doors',
+      'False': 'Open pod bay doors',
+    },
+  },
+  {
+    'id': "silver_toggle_top_4",
+    'control': Switch(
+      device = MCP27,
+      pin = 11,
+    ),
+    'actions': {
+      'True': "You've had enough coffee.",
+      'False': 'Brew coffee',
+    },
+  },
+
+  {
+    'id': "silver_toggle_bottom_1",
+    'control': Switch(
+      device = MCP27,
+      pin = 12,
+    ),
+    'actions': {
+      'True': 'Ungimbal the gimbal',
+      'False': 'Gimbal!',
+    },
+  },
+  {
+    'id': "silver_toggle_bottom_2",
+    'control': Switch(
+      device = MCP27,
+      pin = 14,
+    ),
+    'actions': {
+      'True': 'Stop thrusting.',
+      'False': 'Thrust your thrusters.',
+    },
+  },
+  {
+    'id': "silver_toggle_bottom_3",
+    'control': Switch(
+      device = MCP27,
+      pin = 9,
+    ),
+    'actions': {
+      'True': 'De-Ping!',
+      'False': 'Ping!',
+    },
+  },
+  {
+    'id': "silver_toggle_bottom_4",
+    'control': Switch(
+      device = MCP27,
+      pin = 8,
+    ),
+    'actions': {
+      'True': 'Stop testing me.',
+      'False': 'Test the system!',
+    },
+  },
+
+  {
+    'id': "big_button_green",
+    'control': Switch(
+      device = MCP26,
+      pin = 10,
+    ),
+    'actions': {
+      'False': 'Make it so!',
+    },
+  },
+  {
+    'id': "big_button_red",
+    'control': Switch(
+      device = MCP26,
+      pin = 12,
+    ),
+    'actions': {
+      'False': 'Honk the spacehorn!',
+    },
+  },
+
+  {
+    'id': "power_toggle_green",
+    'control': Switch(
+      device = MCP26,
+      pin = 8,
+    ),
+    'actions': {
+      'True': 'Main power on!',
+      'False': 'Main power off!',
+    },
+  },
+  {
+    'id': "power_toggle_red",
+    'control': Switch(
+      device = MCP26,
+      pin = 8,
+    ),
+    'actions': {
+      'True': 'Auxillary power on!',
+      'False': 'Auxillary power off!',
+    },
+  },
+  {
+    'id': "power_toggle_blue",
+    'control': Switch(
+      device = MCP26,
+      pin = 15,
+    ),
+    'actions': {
+      'True': 'ABSOLUTE POWER',
+      'False': 'Relative power.',
     },
   },
 ]
