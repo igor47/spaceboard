@@ -33,6 +33,8 @@ void arrayWriteBit(uint8_t bit, bool val);
 void arraySend();
 void arrayWipe();
 
+void pwmSweep(uint8_t pin);
+
 /*************** Constants *********************/
 
 #undef LED_BUILTIN
@@ -48,6 +50,10 @@ Adafruit_NeoPixel strip = Adafruit_NeoPixel(LED_COUNT, LED_STRIP_PIN, NEO_GRB + 
 #define ARRAY_LATCH_PIN 31
 #define ARRAY_COUNT 80
 uint8_t array_bytes[(ARRAY_COUNT >> 3) + 1] = {0};
+
+#define THROTTLE_SENSE_PIN 11
+#define OXYGEN_PIN 10
+#define SIGNAL_PIN 9
 
 static const uint32_t BaudRate = 115200;  // baud
 static PacketSerial packetSerial;
@@ -88,6 +94,17 @@ void setup()
 
   arrayWipe();
 
+  // initialize analog input
+  pinMode(THROTTLE_SENSE_PIN, INPUT_ANALOG);
+
+  // test the analog meters
+  pinMode(OXYGEN_PIN, PWM);
+  pwmSweep(OXYGEN_PIN);
+
+  pinMode(SIGNAL_PIN, PWM);
+  pwmSweep(SIGNAL_PIN);
+
+  // done!
   Serial.print("boot!\n");
 }
 
@@ -307,4 +324,13 @@ void arrayWipe() {
 
   // turn off pass-through
   digitalWrite(ARRAY_LATCH_PIN, LOW);
+}
+
+void pwmSweep(uint8_t pin) {
+  for(int duty = 0; duty < 100; duty++) {
+    pwmWrite(pin, map(duty, 0, 100, 0, 65535));
+    delay(10);
+  }
+
+  pwmWrite(pin, 0);
 }
