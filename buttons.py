@@ -1,15 +1,11 @@
 #!/usr/bin/env python2.7
 
+import time
+
 from spaceteam import peripherals
 peripherals.reset_all()
 
-import time
-
-devs = [
-    peripherals.MCP20,
-    peripherals.MCP21,
-    peripherals.MCP22,
-    ]
+devs = [dev for dev in peripherals.INPUTS if type(dev) is peripherals.MCP23017]
 
 for dev in devs:
   dev.communicate()

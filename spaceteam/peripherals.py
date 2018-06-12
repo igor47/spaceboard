@@ -36,11 +36,15 @@ from mcp23017 import MCP23017
 MCP20 = MCP23017(_SMBUS, 0x20)
 MCP21 = MCP23017(_SMBUS, 0x21)
 MCP22 = MCP23017(_SMBUS, 0x22)
+MCP26 = MCP23017(_SMBUS, 0x26)
+MCP27 = MCP23017(_SMBUS, 0x27)
 
 INPUTS = [
     MCP20,
     MCP21,
     MCP22,
+    MCP26,
+    MCP27,
     ]
 
 # initialize microcontroller
