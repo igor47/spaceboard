@@ -9,7 +9,7 @@ from spaceteam import state
 import time
 import sdnotify
 
-SERVER_IP = '10.110.0.10'
+SERVER_IP = '10.110.0.211'
 #SERVER_IP = '10.0.0.1'
 
 def updates(prev, new):
@@ -51,10 +51,7 @@ def main(args):
       if client and not client.running():
         raise RuntimeError("The client has stopped!")
 
-      # notify the watchdog that we're okay (otherwise we get rebooted by systemd)
-      # if the power button is held down long enough, this will happen
-      if prev_state['power']:  # button not pushed down
-        notifier.notify("WATCHDOG=1")
+      notifier.notify("WATCHDOG=1")
 
       # read any peripherals
       peripherals.read_all()
