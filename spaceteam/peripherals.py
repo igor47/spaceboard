@@ -69,7 +69,6 @@ from progress import Progress
 PROGRESS = Progress(MAPLE)
 
 OUTPUTS = [
-    PROGRESS,
     MAPLE,
     DISPLAY,
     ]
