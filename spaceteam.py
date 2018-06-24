@@ -83,6 +83,9 @@ def main(args):
         elif inst['type'] == 'status':
           peripherals.DISPLAY.status = inst['message']
 
+        elif inst['type'] == 'integrity':
+          peripherals.MICROCONTROLLER.set_oxygen(inst['message'])
+
         # get next instruction
         inst = client.get_instruction()
 

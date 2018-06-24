@@ -150,6 +150,10 @@ class Microcontroller(object):
 
     self.latch_now_or_later(latch)
 
+  def set_oxygen(self, val):
+    """Sets a specific LED in the array"""
+    self._send_command(["X", val])
+
   def set_array_led(self, number, val, latch = False):
     """Sets a specific LED in the array"""
     if val:

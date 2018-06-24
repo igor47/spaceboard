@@ -81,6 +81,9 @@ class Client:
       elif msg['message'] == 'set-progress':
         return {'type': 'progress', 'message': msg['data']['value']}
 
+      elif msg['message'] == 'set-integrity':
+        return {'type': 'integrity', 'message': int(msg['data']['value'])}
+
       elif msg['message'] == 'keep-alive':
         self.last_keepalive = time.time()
 

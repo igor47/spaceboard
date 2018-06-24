@@ -175,6 +175,16 @@ void onPacket(const uint8_t* buffer, size_t size)
       }
       break;
 
+    // OXYGEN<byte> sets the oxygen meter to the specified place
+    case 'X':
+      if(size == 2) {
+        unsigned int val = buffer[1];
+        pwmWrite(OXYGEN_PIN, map(val, 0, 100, 0, 65535));
+      } else {
+        state.badCommandsReceived++;
+      }
+      break;
+
     // ON<bit> turns on an led in the array
     case '1':
       if(size == 2) {
@@ -201,7 +211,6 @@ void onPacket(const uint8_t* buffer, size_t size)
     default:
       state.badCommandsReceived++;
       break;
-
   }
 
   if (state.badCommandsReceived == prevBad) {
