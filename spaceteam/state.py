@@ -236,9 +236,10 @@ INPUTS = [
 
   {
     'id': "silver_toggle_top_1",
-    'control': Switch(
+    'control': SwitchWithLed(
       device = MCP27,
       pin = 15,
+      array_idx = 59,
     ),
     'actions': {
       'True': 'Freeze the cryofan',
@@ -247,9 +248,10 @@ INPUTS = [
   },
   {
     'id': "silver_toggle_top_2",
-    'control': Switch(
+    'control': SwitchWithLed(
       device = MCP27,
       pin = 15,
+      array_idx = 33,
     ),
     'actions': {
       'False': 'Transduce the transducer!',
@@ -258,9 +260,10 @@ INPUTS = [
   },
   {
     'id': "silver_toggle_top_3",
-    'control': Switch(
+    'control': SwitchWithLed(
       device = MCP27,
       pin = 13,
+      array_idx = 56,
     ),
     'actions': {
       'True': 'Close pod bay doors',
@@ -269,9 +272,10 @@ INPUTS = [
   },
   {
     'id': "silver_toggle_top_4",
-    'control': Switch(
+    'control': SwitchWithLed(
       device = MCP27,
       pin = 11,
+      array_idx = 57,
     ),
     'actions': {
       'True': "You've had enough coffee.",
@@ -281,9 +285,10 @@ INPUTS = [
 
   {
     'id': "silver_toggle_bottom_1",
-    'control': Switch(
+    'control': SwitchWithLed(
       device = MCP27,
       pin = 12,
+      array_idx = 44,
     ),
     'actions': {
       'True': 'Ungimbal the gimbal',
@@ -292,9 +297,10 @@ INPUTS = [
   },
   {
     'id': "silver_toggle_bottom_2",
-    'control': Switch(
+    'control': SwitchWithLed(
       device = MCP27,
       pin = 14,
+      array_idx = 19,
     ),
     'actions': {
       'True': 'Stop thrusting.',
@@ -303,9 +309,10 @@ INPUTS = [
   },
   {
     'id': "silver_toggle_bottom_3",
-    'control': Switch(
+    'control': SwitchWithLed(
       device = MCP27,
       pin = 9,
+      array_idx = 60,
     ),
     'actions': {
       'True': 'De-Ping!',
@@ -314,12 +321,13 @@ INPUTS = [
   },
   {
     'id': "silver_toggle_bottom_4",
-    'control': Switch(
+    'control': SwitchWithLed(
       device = MCP27,
       pin = 8,
+      array_idx = 18,
     ),
     'actions': {
-      'True': 'Stop testing me.',
+      'True': "Don't TEST me',
       'False': 'Test the system!',
     },
   },
@@ -350,6 +358,7 @@ INPUTS = [
     'control': Switch(
       device = MCP26,
       pin = 8,
+      array_idx = 46,
     ),
     'actions': {
       'True': 'Main power on!',
@@ -358,13 +367,14 @@ INPUTS = [
   },
   {
     'id': "power_toggle_red",
-    'control': Switch(
+    'control': SwitchWithLed(
       device = MCP26,
       pin = 8,
+      array_idx = 20,
     ),
     'actions': {
-      'True': 'Auxillary power on!',
-      'False': 'Auxillary power off!',
+      'True': 'Route auxillary power!',
+      'False': 'Deactivate auxillary power',
     },
   },
   {
@@ -372,6 +382,7 @@ INPUTS = [
     'control': Switch(
       device = MCP26,
       pin = 15,
+      array_idx = 17,
     ),
     'actions': {
       'True': 'ABSOLUTE POWER',
