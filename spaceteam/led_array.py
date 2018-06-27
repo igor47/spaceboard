@@ -38,6 +38,11 @@ class LedArray(object):
     else:
       self.turn_off(idx)
 
+  def toggle(self, idx):
+    byte, bit = self.__idx_to_byte_bit(idx)
+    active = (self.is_on[byte] & bit) != 0
+    self.set_led(idx, not active)
+
   def communicate(self):
     """Reads the state of all enabled pins and saves it locally"""
     self.__advance_inside_leds()
@@ -73,6 +78,15 @@ if __name__ == "__main__":
   peripherals.reset_all()
 
   array = peripherals.ARRAY
-  while True:
+  count = 0
+  while count != (2 ** array.chip_count) - 1:
     array.communicate()
-    time.sleep(1)
+    count += 1
+    time.sleep(0.25)
+
+  for idx in xrange(16 * array.chip_count):
+    print 'toggling led %d' % idx
+    for i in xrange(20):
+      array.toggle(idx)
+      array.communicate()
+      time.sleep(0.25)
