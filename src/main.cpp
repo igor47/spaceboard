@@ -28,9 +28,8 @@ void onPacket(const uint8_t* buffer, size_t size);
 void colorWipe(uint32_t c, uint8_t wait);
 void clearStrip();
 
-bool arrayReadBit(uint8_t bit);
-void arrayWriteBit(uint8_t bit, bool val);
-void arraySend();
+void arraySend(uint8_t byte);
+void arrayLatch();
 void arrayWipe();
 
 void pwmSweep(uint8_t pin);
@@ -49,7 +48,6 @@ Adafruit_NeoPixel strip = Adafruit_NeoPixel(LED_COUNT, LED_STRIP_PIN, NEO_GRB + 
 #define ARRAY_CLOCK_PIN 30
 #define ARRAY_LATCH_PIN 31
 #define ARRAY_COUNT 80
-uint8_t array_bytes[(ARRAY_COUNT >> 3) + 1] = {0};
 
 #define THROTTLE_SENSE_PIN 11
 #define OXYGEN_PIN 10
@@ -133,7 +131,6 @@ void onPacket(const uint8_t* buffer, size_t size)
       break;
     // LATCH: forces a display of the led strip
     case 'L':
-      arraySend();
       strip.show();
       break;
     // CLEAR: resets all of the leds
@@ -168,8 +165,9 @@ void onPacket(const uint8_t* buffer, size_t size)
     case 'A':
       if(size == 1 + (ARRAY_COUNT / 8)) {
         for (unsigned int i = 1; i < size; i++) {
-          array_bytes[i-1] = buffer[i];
+          arraySend(buffer[i]);
         }
+        arrayLatch();
       } else {
         state.badCommandsReceived++;
       }
@@ -180,23 +178,6 @@ void onPacket(const uint8_t* buffer, size_t size)
       if(size == 2) {
         unsigned int val = buffer[1];
         pwmWrite(OXYGEN_PIN, map(val, 0, 100, 0, 65535));
-      } else {
-        state.badCommandsReceived++;
-      }
-      break;
-
-    // ON<bit> turns on an led in the array
-    case '1':
-      if(size == 2) {
-        arrayWriteBit(buffer[1], 1);
-      } else {
-        state.badCommandsReceived++;
-      }
-      break;
-    // OFF<bit> turns on an led in the array
-    case '0':
-      if(size == 2) {
-        arrayWriteBit(buffer[1], 0);
       } else {
         state.badCommandsReceived++;
       }
@@ -275,37 +256,29 @@ void colorWipe(uint32_t c, uint8_t wait) {
   }
 }
 
-bool arrayReadBit(uint8_t bit) {
-  uint8_t byte = array_bytes[bit >> 3];
-  return (byte >> (bit % 8)) & 1;
-}
+void arraySend(uint8_t byte) {
+  uint8_t bit;
 
-void arrayWriteBit(uint8_t bit, bool val) {
-  uint8_t bit_set = 1 << bit % 8;
-  if (val)
-    array_bytes[bit >> 3] |= bit_set;
-  else
-    array_bytes[bit >> 3] &= ~bit_set;
-}
+  for(uint8_t idx = 0; idx < 8; idx++) {
+    bit = (byte >> idx) & 1;
 
-void arraySend() {
-  for(uint8_t bit = 0; bit < ARRAY_COUNT; bit++) {
     // put the data on the wire
-    digitalWrite(ARRAY_DATA_PIN, arrayReadBit(bit));
+    digitalWrite(ARRAY_DATA_PIN, bit);
 
     // clock the data into the shift register
     digitalWrite(ARRAY_CLOCK_PIN, HIGH);
     digitalWrite(ARRAY_CLOCK_PIN, LOW);
   }
+}
 
-  // now latch the data to the output
+void arrayLatch() {
   digitalWrite(ARRAY_LATCH_PIN, HIGH);
   digitalWrite(ARRAY_LATCH_PIN, LOW);
 }
 
 void arrayWipe() {
   uint8_t bit;
- 
+
   toggle_led();
 
   // set pass-through mode for the latch

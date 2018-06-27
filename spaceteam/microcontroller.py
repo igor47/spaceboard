@@ -154,14 +154,9 @@ class Microcontroller(object):
     """Sets a specific LED in the array"""
     self._send_command(["X", val])
 
-  def set_array_led(self, number, val, latch = False):
-    """Sets a specific LED in the array"""
-    if val:
-      self._send_command(["1", number])
-    else:
-      self._send_command(["0", number])
-
-    self.latch_now_or_later(latch)
+  def update_array(self, bytes):
+    """Updates the data displayed by the LED array"""
+    self._send_command(['A'] + bytes)
 
   def set_led_batch(self, first_led, colors = [], latch = False):
     """Sets all specified colors"""
