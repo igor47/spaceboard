@@ -96,6 +96,22 @@ class SwitchWithTwoLights(Switch):
       self.prev_down_color = down_color
       peripherals.MAPLE.set_led(self.led_down_id, down_color)
 
+class SwitchWithLed(Switch):
+  def __init__(self, device, pin, led_idx, sounds = None):
+    Switch.__init__(self, device, pin, sounds)
+    self.led_idx = led_idx
+    self.led_state = None
+
+  def after_read(self):
+    Switch.after_read(self)
+    self.set_color()
+
+  def set_color(self):
+    new_state = True if self.active() else False
+    if self.led_state != new_state:
+      peripherals.ARRAY.set_led(self.led_id, new_state)
+      self.led_state = new_state
+
 class KeypadButton(SwitchWithLight):
   """Just like a switch with a light, but calls a callback on press"""
 

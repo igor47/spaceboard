@@ -32,7 +32,7 @@ class LedArray(object):
     byte, bit = self.__idx_to_byte_bit(idx)
     self.is_on[byte] &= c_ubyte(~bit).value
 
-  def set(self, idx, on):
+  def set_led(self, idx, on):
     if on:
       self.turn_on(idx)
     else:

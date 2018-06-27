@@ -65,12 +65,16 @@ DISPLAY_RESET_PIN = RESET_PIN # pin 7; we pass NONE to device since we do reset 
 from ssd1325 import SSD1325
 DISPLAY = SSD1325(gpio = GPIO, gpio_DC = 29, gpio_RST = None)
 
+from led_array import LedArray
+ARRAY = LedArray(MAPLE, 5)
+
 from progress import Progress
 PROGRESS = Progress(MAPLE)
 
 OUTPUTS = [
     MAPLE,
     DISPLAY,
+    ARRAY,
     ]
 
 from sound_player import SoundPlayer
