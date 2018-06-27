@@ -78,15 +78,12 @@ if __name__ == "__main__":
   peripherals.reset_all()
 
   array = peripherals.ARRAY
-  count = 0
-  while count != (2 ** array.chip_count) - 1:
-    array.communicate()
-    count += 1
-    time.sleep(0.25)
 
-  for idx in xrange(16 * array.chip_count):
-    print 'toggling led %d' % idx
-    for i in xrange(20):
-      array.toggle(idx)
-      array.communicate()
-      time.sleep(0.25)
+  idx = 0
+  while True:
+    array.turn_on(idx)
+    array.communicate()
+    raw_input("turned on %s; press <Enter> to continue..." % idx)
+
+    array.turn_off(idx)
+    idx = (idx + 1) % (16 * array.chip_count)

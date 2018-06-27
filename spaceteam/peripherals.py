@@ -68,13 +68,23 @@ DISPLAY = SSD1325(gpio = GPIO, gpio_DC = 29, gpio_RST = None)
 from led_array import LedArray
 ARRAY = LedArray(MAPLE, 5)
 
+from bar_graph import BarGraph
+RED_BAR = BarGraph(ARRAY, [51, 49, 48, 53, 70, 50, 61, 69, 67, 52], 'sweep')
+GREEN_BAR = BarGraph(ARRAY, [68, 73, 74, 65, 54, 76, 79, 64, 77, 62], 'sweep')
+ORANGE_BAR = BarGraph(ARRAY, [34, 38, 16, 37, 75, 43, 78, 63, 72, 66], 'sweep')
+BARS = [
+    RED_BAR,
+    GREEN_BAR,
+    ORANGE_BAR,
+    ]
+
 from progress import Progress
 PROGRESS = Progress(MAPLE)
 
-OUTPUTS = [
-    MAPLE,
+OUTPUTS = BARS + [
     DISPLAY,
     ARRAY,
+    MAPLE,
     ]
 
 from sound_player import SoundPlayer
