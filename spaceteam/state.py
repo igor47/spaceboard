@@ -9,7 +9,7 @@ from seven_segment import SevenSegment
 
 INPUTS = [
   {
-    'id': "top_left_rocket_yellow",
+    'id': "top_left_rocket_red",
     'control': Switch(
       device = MCP20,
       pin = 4,
@@ -96,6 +96,7 @@ INPUTS = [
       'False': 'Release parking brake.',
     }
   },
+
   {
     'id': "airlock_rocker_1",
     'control': SwitchWithPulldown(
@@ -129,6 +130,7 @@ INPUTS = [
       'False': 'Vent the airlock.',
     }
   },
+
   {
     'id': "nuke_arcade",
     'control': Switch(
@@ -179,6 +181,39 @@ INPUTS = [
     ),
     'actions': {
       'False': 'Chaff!',
+    },
+  },
+  {
+    'id': 'weapons_red_rocket_top',
+    'control': Switch(
+      device = MCP21,
+      pin = 12,
+    ),
+    'actions': {
+      'True': 'Arm missiles',
+      'False': 'Disarm missiles',
+    },
+  },
+  {
+    'id': 'weapons_red_rocket_bottom',
+    'control': Switch(
+      device = MCP21,
+      pin = 3,
+    ),
+    'actions': {
+      'True': 'Raise shields',
+      'False': 'Lower shields',
+    },
+  },
+  {
+    'id': 'weapons_yellow_rocket',
+    'control': Switch(
+      device = MCP21,
+      pin = 7,
+    ),
+    'actions': {
+      'True': 'Arm lasers',
+      'False': 'Disarm lasers',
     },
   },
 
@@ -355,7 +390,7 @@ INPUTS = [
 
   {
     'id': "power_toggle_green",
-    'control': Switch(
+    'control': SwitchWithLed(
       device = MCP26,
       pin = 8,
       array_idx = 46,
@@ -379,7 +414,7 @@ INPUTS = [
   },
   {
     'id': "power_toggle_blue",
-    'control': Switch(
+    'control': SwitchWithLed(
       device = MCP26,
       pin = 15,
       array_idx = 17,
@@ -388,6 +423,73 @@ INPUTS = [
       'True': 'ABSOLUTE POWER',
       'False': 'Relative power.',
     },
+  },
+
+  {
+    'id': 'on_off_toggle_1',
+    'control': Switch(
+      device = MCP26,
+      pin = 11,
+    ),
+    'actions': {
+      'False': 'Re-route power to level 10',
+      'True': 'Shut off power to level 10',
+    },
+  },
+  {
+    'id': 'on_off_toggle_2',
+    'control': Switch(
+      device = MCP26,
+      pin = 14,
+    ),
+    'actions': {
+      'False': 'Activate massage chair',
+      'True': 'Deactivate message chair',
+    },
+  },
+  {
+    'id': 'flight_rocker_1',
+    'control': SwitchWithPulldown(
+      device = MCP26,
+      pin = 9,
+    ),
+    'actions': {
+      'True': 'Activate infinite improbability drive',
+      'False': 'Restore normal probability',
+    }
+  },
+  {
+    'id': "flight_rocker_2",
+    'control': SwitchWithPulldown(
+      device = MCP26,
+      pin = 3,
+    ),
+    'actions': {
+      'True': 'Stir coolant',
+      'False': 'Congeal coolant',
+    }
+  },
+  {
+    'id': "flight_rocker_3",
+    'control': SwitchWithPulldown(
+      device = MCP27,
+      pin = 0,
+    ),
+    'actions': {
+      'True': 'Activate plasma containment field',
+      'False': 'Disperse plasma containment field',
+    }
+  },
+  {
+    'id': "flight_rocker_4",
+    'control': SwitchWithPulldown(
+      device = MCP26,
+      pin = 6,
+    ),
+    'actions': {
+      'True': 'Prepare to enter hyperspace',
+      'False': 'Exit hyperspace',
+    }
   },
 ]
 
