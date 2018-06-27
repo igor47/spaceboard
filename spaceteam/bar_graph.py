@@ -8,10 +8,10 @@ class BarGraph(object):
 
     Passed values:
       array: the array that the LEDs are on
-      pins: a list of array idx values, [0] is the first led, [9] is the last
+      pins: a list of array idx values, [0] is the first led, [-1] is the last
       mode: the mode (see below)
 
-    Values: 0 means all LEDs are off, 10 means they're all on
+    Values: 0 means all LEDs are off, len(pins) means they're all on
     Modes:
       display: just displays the specified value
       countdown: display the specified value, but blink the last-lit LED
@@ -37,8 +37,9 @@ class BarGraph(object):
     self._blink_on = True
 
   def update_value(self, new_value):
-    if new_value < 0 or new_value > 10:
-      raise ValueError('BarGraph value must be between 0 and 10 (got %d)' % new_value)
+    if new_value < 0 or new_value > len(self.pins):
+      raise ValueError(
+          'BarGraph value must be between 0 and %s (got %d)' % (len(self.pins), new_value))
     else:
       self.value = new_value
 
@@ -47,16 +48,16 @@ class BarGraph(object):
 
     if self.mode == 'sweep':
       # go up one led, and turn that one on
-      self.update_value((self.value + 1) % 10)
+      self.update_value((self.value + 1) % len(self.pins))
       should_be_on = [self.value]
 
       # also turn on the leds below the current, specified by width
       for i in xrange(self.SWEEP_WIDTH):
-        should_be_on.append((self.value - 1) % 10)
+        should_be_on.append((self.value - 1) % len(self.pins))
 
     elif self.mode in ['display', 'countdown']:
       # turn on all the leds up to value
-      should_be_on = [i for i in xrange(10) if i < self.value]
+      should_be_on = [i for i in xrange(len(self.pins)) if i < self.value]
 
       # if we're blinking, the last-on led should blink
       if self.mode == 'countdown':
@@ -66,7 +67,7 @@ class BarGraph(object):
           self._blink_on = not self._blink_on
 
         # turn the blinking led on/off
-        blinking_idx = min(9, value)
+        blinking_idx = min(len(self.pins) - 1, value)
         if self.countdown_blink_on:
           should_be_on.append(blinking_idx)
         else:
