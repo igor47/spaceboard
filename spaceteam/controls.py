@@ -329,23 +329,28 @@ class RotaryEncoder(object):
     self.last_transition = None
 
     self.counter = 0
-    self.prev_counter = None
+    self.prev_counter = 0
 
     self.direction = 'clockwise'
     self.prev_direction = None
 
+  @property
   def value(self):
     return self.direction
+
+  @property
   def prev_value(self):
     return self.prev_direction
 
   def _update(self, delta):
     self.prev_direction = self.direction
-    self.prev_counter = counter
+    self.prev_counter = self.counter
     self.counter += delta
     self.direction = 'clockwise' if delta == 1 else 'counter'
 
   def read(self):
+    self.prev_counter = self.counter
+
     self.switch_a.read()
     self.switch_b.read()
     a_changed = self.switch_a.prev_value != self.switch_a.value
@@ -365,8 +370,11 @@ class RotaryEncoder(object):
 
       # completed a counter-clockwise click
       elif self.last_transition == 'b':
-        self.update(-1)
-        self.last_transition = None
+        if self.switch_a.value == self.switch_b.value:
+          self._update(-1)
+          self.last_transition = None
+        else:
+          self.last_transition = 'a'
 
     elif b_changed:
       # we started spinning counter
@@ -377,10 +385,15 @@ class RotaryEncoder(object):
       elif self.last_transition == 'b':
         self.last_transition = None
 
-      # completed a clockwise click
+      # we think we completed a clockwise click
       elif self.last_transition == 'a':
-        self.update(1)
-        self.last_transition = None
+        # it's only valid if the values became the same
+        if self.switch_a.value == self.switch_b.value:
+          self._update(1)
+          self.last_transition = None
+        # nope, they're different, so we should be in 'b' mode
+        else:
+          self.last_transition = 'b'
 
 class ShieldModulator(object):
   """A rotary encoder with a ring of LEDs around it"""
@@ -388,36 +401,42 @@ class ShieldModulator(object):
       {'name':'cerulean', 'color': Color('blue')},
       {'name': 'saffron', 'color': Color('yellow')},
       {'name': 'chartreuse', 'color': Color('chartreuse')},
-      {'name': 'lavender', 'color': Color('lavender')},
+      {'name': 'lavender', 'color': Color('purple')},
     ]
+  for item in COLORS:
+    item['color'].luminance = 0.1
 
-  DIM_PCT = 0.5
+  DIM_PCT = 0.1
 
   def __init__(self, encoder, first_led, led_count = 12):
-    self.encoder = enconder
+    self.encoder = encoder
     self.first_led = first_led
     self.led_count = led_count
 
     self.cur_idx = 0
+    self.prev_idx = -1
     self.value = None
     self.prev_value = None
 
   def read(self):
     # read the current color index
-    self.enconder.read()
-    diff = self.encoder.value - self.encoder.prev_value
-    self.cur_idx = diff % self.led_count
+    self.encoder.read()
+    diff = self.encoder.counter - self.encoder.prev_counter
+    self.cur_idx = (self.cur_idx + diff) % self.led_count
 
     # save the current color as the value (retaining prev_value)
-    cur_color = self.COLORS[self.cur_idx / (self.led_count / len(self.COLORS))]
+    color_idx = self.cur_idx / (self.led_count / len(self.COLORS))
+    cur_color = self.COLORS[color_idx]
     self.value = cur_color['name']
 
     # do we need to update the led array?
-    if self.value != self.prev_value:
+    if self.cur_idx != self.prev_idx:
+      self.prev_idx = self.cur_idx
+
       # build an array of colors to populate the string
       new_colors = []
-      for i in xrange(led_count):
-        color_index = len(self.COLORS) * i / led_count;
+      for i in xrange(self.led_count):
+        color_index = len(self.COLORS) * i / self.led_count
         color = Color(self.COLORS[color_index]['color'])
 
         # dim inactive colors
