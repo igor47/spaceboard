@@ -23,7 +23,7 @@ INPUTS = [
     'id': "top_left_rocket_yellow",
     'control': Switch(
       device = MCP20,
-      pin = 4,
+      pin = 6,
       sounds = {True: 'robot', False: 'robot-complain'},
     ),
     'actions': {
@@ -289,7 +289,7 @@ INPUTS = [
     'id': "silver_toggle_top_2",
     'control': SwitchWithLed(
       device = MCP27,
-      pin = 15,
+      pin = 10,
       array_idx = 33,
     ),
     'actions': {
@@ -413,7 +413,7 @@ INPUTS = [
     'id': "power_toggle_red",
     'control': SwitchWithLed(
       device = MCP26,
-      pin = 8,
+      pin = 13,
       array_idx = 20,
     ),
     'actions': {
