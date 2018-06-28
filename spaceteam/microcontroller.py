@@ -115,12 +115,13 @@ class Microcontroller(object):
 
     # we expect the microcontroller to respond quickly
     data = self._recv_command()
-    if data[0] != 'S' or len(data) != 9:
+    if data[0] != 'S' or len(data) != 11:
       raise RuntimeError("Invalid response (with code %s len %d) to a state request" % (data[0]), len(data))
 
     return {
         'received': struct.unpack('>I', data[1:5]),
         'bad': struct.unpack('>I', data[5:9]),
+        'throttle': struct.unpack('>H', data[10:11]),
       }
 
   def reset(self):

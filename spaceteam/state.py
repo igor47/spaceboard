@@ -501,6 +501,15 @@ INPUTS = [
       'False': 'Exit cyberspace',
     }
   },
+  {
+    'id': 'throttle',
+    'control': Throttle(first_led_id=25, led_count=15),
+    'actions': {
+      'low': 'Set throttle to minimum',
+      'mid': 'Set throttle to medium',
+      'high': 'Set throttle to maximum',
+    },
+  },
 ]
 
 def announce(inputs = INPUTS):
