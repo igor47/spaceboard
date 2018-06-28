@@ -84,7 +84,7 @@ def main(args):
           peripherals.DISPLAY.status = inst['message']
 
         elif inst['type'] == 'integrity':
-          peripherals.MICROCONTROLLER.set_oxygen(inst['message'])
+          peripherals.MAPLE.set_oxygen(inst['message'])
 
         # get next instruction
         inst = client.get_instruction()
