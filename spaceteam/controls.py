@@ -66,36 +66,6 @@ class SwitchWithLight(Switch):
       peripherals.MAPLE.set_led(self.led_id, new_color, latch = False)
       self.prev_color = new_color
 
-class SwitchWithTwoLights(Switch):
-  UP_ON_COLOR = Color(rgb = (0.8, 0.2, 0))
-  UP_OFF_COLOR = Color(rgb = (0.1, 0.025, 0))
-
-  DOWN_ON_COLOR = Color(rgb = (0, 0.2, 0.4))
-  DOWN_OFF_COLOR = Color(rgb = (0, 0.025, 0.05))
-
-  def __init__(self, device, pin, led_up_id, led_down_id, sounds = None):
-    Switch.__init__(self, device, pin, sounds)
-    self.led_up_id = led_up_id
-    self.led_down_id = led_down_id
-
-    self.prev_up_color = None
-    self.prev_down_color = None
-
-  def after_read(self):
-    Switch.after_read(self)
-    self.set_color()
-
-  def set_color(self):
-    up_color = self.UP_ON_COLOR if self.active() else self.UP_OFF_COLOR
-    if up_color != self.prev_up_color:
-      self.prev_up_color = up_color
-      peripherals.MAPLE.set_led(self.led_up_id, up_color)
-
-    down_color = self.DOWN_OFF_COLOR if self.active() else self.DOWN_ON_COLOR
-    if down_color != self.prev_down_color:
-      self.prev_down_color = down_color
-      peripherals.MAPLE.set_led(self.led_down_id, down_color)
-
 class SwitchWithLed(Switch):
   def __init__(self, device, pin, array_idx, sounds = None):
     Switch.__init__(self, device, pin, sounds)
