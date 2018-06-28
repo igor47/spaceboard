@@ -90,7 +90,7 @@ INPUTS = [
     'id': "landing_rocker_5",
     'control': SwitchWithPulldown(
       device = MCP20,
-      pin = 12,
+      pin = 14,
     ),
     'actions': {
       'True': 'Set the parking brake.',
@@ -296,7 +296,7 @@ INPUTS = [
     'id': "misc_green_arcade",
     'control': Switch(
       device = MCP21,
-      pin = 1,
+      pin = 6,
     ),
     'actions': {
       'False': 'Green button next to "dump waste"',
@@ -419,7 +419,7 @@ INPUTS = [
     'id': "big_button_red",
     'control': Switch(
       device = MCP26,
-      pin = 12,
+      pin = 9,
       sounds = {False: 'horn'}
     ),
     'actions': {
@@ -444,7 +444,7 @@ INPUTS = [
     'id': "power_toggle_red",
     'control': SwitchWithLed(
       device = MCP26,
-      pin = 13,
+      pin = 15,
       array_idx = 20,
       backwards = True,
     ),
@@ -457,7 +457,7 @@ INPUTS = [
     'id': "power_toggle_blue",
     'control': SwitchWithLed(
       device = MCP26,
-      pin = 15,
+      pin = 13,
       array_idx = 17,
       backwards = True,
     ),
@@ -471,7 +471,7 @@ INPUTS = [
     'id': 'on_off_toggle_1',
     'control': Switch(
       device = MCP26,
-      pin = 11,
+      pin = 12,
     ),
     'actions': {
       'False': 'Re-route power to level 10',
@@ -482,7 +482,7 @@ INPUTS = [
     'id': 'on_off_toggle_2',
     'control': Switch(
       device = MCP26,
-      pin = 14,
+      pin = 11,
     ),
     'actions': {
       'False': 'Activate massage chair',
@@ -493,7 +493,7 @@ INPUTS = [
     'id': 'flight_rocker_1',
     'control': SwitchWithPulldown(
       device = MCP26,
-      pin = 9,
+      pin = 14,
     ),
     'actions': {
       'True': 'Activate infinite improbability drive',
@@ -587,6 +587,9 @@ INPUTS = [
     ),
     'actions': {"%03d" % n: "Set course to %d!" % n for n in xrange(999)}
 	},
+]
+
+disabled_controls = [
   {
     'id': 'throttle',
     'control': Throttle(first_led_id=37, led_count=15),
