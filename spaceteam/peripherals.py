@@ -67,6 +67,8 @@ DISPLAY = SSD1325(gpio = GPIO, gpio_DC = 29, gpio_RST = None)
 
 from led_array import LedArray
 ARRAY = LedArray(MAPLE, 5)
+ARRAY.turn_on(41) # nuke warning
+ARRAY.turn_on(40) # signal light
 
 from integrity import Integrity
 INTEGRITY = Integrity(MAPLE, ARRAY, [45, 36, 35])

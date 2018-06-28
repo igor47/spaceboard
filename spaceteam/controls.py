@@ -67,10 +67,18 @@ class SwitchWithLight(Switch):
       self.prev_color = new_color
 
 class SwitchWithLed(Switch):
-  def __init__(self, device, pin, array_idx, sounds = None):
+  BLINK_INTERVAL = 0.8 # seconds
+
+  def __init__(
+      self, device, pin, array_idx, sounds = None, backwards = False, blink = False):
     Switch.__init__(self, device, pin, sounds)
     self.array_idx = array_idx
-    self.led_state = None
+
+    self.backwards = backwards
+    self.blink = blink
+
+    self.last_blink = 0
+    self.blink_state = True
 
   def after_read(self):
     Switch.after_read(self)
@@ -78,9 +86,18 @@ class SwitchWithLed(Switch):
 
   def set_color(self):
     new_state = True if self.active() else False
-    if self.led_state != new_state:
-      peripherals.ARRAY.set_led(self.array_idx, new_state)
-      self.led_state = new_state
+    if self.backwards:
+      new_state = not new_state
+
+    if self.blink:
+      t = time.time()
+      if (t - self.last_blink) > self.BLINK_INTERVAL:
+        self.last_blink = t
+        self.blink_state = not self.blink_state
+
+      new_state = new_state and self.blink_state
+
+    peripherals.ARRAY.set_led(self.array_idx, new_state)
 
 class KeypadButton(SwitchWithLight):
   """Just like a switch with a light, but calls a callback on press"""

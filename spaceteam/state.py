@@ -99,6 +99,33 @@ INPUTS = [
   },
 
   {
+    'id': 'turn_signal_left',
+    'control': SwitchWithLed(
+      device = MCP20,
+      pin = 15,
+      array_idx = 47,
+      blink = True,
+    ),
+    'actions': {
+      'False': 'Indicate left turn!',
+      'True': 'Turn signal off!',
+    },
+  },
+  {
+    'id': 'turn_signal_right',
+    'control': SwitchWithLed(
+      device = MCP20,
+      pin = 11,
+      array_idx = 58,
+      blink = True,
+    ),
+    'actions': {
+      'False': 'Indicate right turn!',
+      'True': 'Turn signal off!',
+    },
+  },
+
+  {
     'id': "airlock_rocker_1",
     'control': SwitchWithPulldown(
       device = MCP20,
@@ -144,9 +171,12 @@ INPUTS = [
   },
   {
     'id': "nuke_key",
-    'control': Switch(
+    'control': SwitchWithLed(
       device = MCP20,
       pin = 7,
+      array_idx = 32,
+      blink = True,
+      backwards = True,
     ),
     'actions': {
       'True': 'Hasten nuclear apocalypse',
@@ -403,6 +433,7 @@ INPUTS = [
       device = MCP26,
       pin = 8,
       array_idx = 46,
+      backwards = True,
     ),
     'actions': {
       'True': 'Main power on!',
@@ -415,6 +446,7 @@ INPUTS = [
       device = MCP26,
       pin = 13,
       array_idx = 20,
+      backwards = True,
     ),
     'actions': {
       'True': 'Route auxillary power!',
@@ -427,6 +459,7 @@ INPUTS = [
       device = MCP26,
       pin = 15,
       array_idx = 17,
+      backwards = True,
     ),
     'actions': {
       'True': 'ABSOLUTE POWER',
@@ -556,7 +589,7 @@ INPUTS = [
 	},
   {
     'id': 'throttle',
-    'control': Throttle(first_led_id=25, led_count=15),
+    'control': Throttle(first_led_id=37, led_count=15),
     'actions': {
       'low': 'Set throttle to minimum',
       'mid': 'Set throttle to medium',
