@@ -202,6 +202,7 @@ void onPacket(const uint8_t* buffer, size_t size)
 // sends the current program state to the computer
 void send_state()
 {
+  uint16_t throttle = analogRead(THROTTLE_SENSE_PIN);
   uint8_t packet[] = {
     'S', 
     (uint8_t)(state.commandsReceived >> 24),
@@ -213,8 +214,11 @@ void send_state()
     (uint8_t)(state.badCommandsReceived >> 16),
     (uint8_t)(state.badCommandsReceived >> 8),
     (uint8_t)(state.badCommandsReceived >> 0),
+
+    (uint8_t)(throttle >> 8),
+    (uint8_t)(throttle >> 0),
   };
-  packetSerial.send(packet, 9);
+  packetSerial.send(packet, 11);
 
   // also send over serial link
   Serial.print("C:");

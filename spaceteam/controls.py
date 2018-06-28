@@ -221,49 +221,16 @@ class Keypad(object):
       d = self.displays[idx]
       d.display(char)
 
-class Analog(object):
+class Throttle(object):
+  """A bigass knife switch with a potentiometer and some leds under it."""
   CHANGE_THRESHOLD = 2
 
-  """An analog input (potentiometer)"""
-  def __init__(self, device, pin):
-    self.device = device
-    self.pin = pin
-
-    # initialize hysterisis
-    self.prev_value = 500
-    self.value = 500
-
-    # enable reading that pin
-    self.device.enable_pin(pin)
-
-  def read(self):
-    cur_value = int(self.device.read(self.pin, scaled = True))
-
-    # we only save the new value if it's changed more than threshold
-    # this prevents oscillating due to analog jitter
-    change = abs(cur_value - self.value)
-    if change > self.CHANGE_THRESHOLD:
-      self.prev_value = self.value
-      self.value = cur_value
-
-    self.after_read()
-
-  def after_read(self):
-    pass
-
-class Accelerator(object):
-  """A potentiometer with LEDs indicating the position"""
-  RANGE = 50  # how high does it get?
-
-  def __init__(self, device, pin, first_led_id, led_count):
-    self.sensor = Analog(device, pin)
-
+  def __init__(self, first_led_id, led_count):
+    self.prev_raw_value = 0
+    self.raw_value = 0
     self.value = None
-    self.prev_value = None
-
     self.first_led_id = first_led_id
     self.led_count = led_count
-
     # configure the colors
     self.black = Color("black")
     self.color_range = [
@@ -290,28 +257,33 @@ class Accelerator(object):
       ]
 
   def read(self):
-    self.sensor.read()
-    pct = float(self.sensor.value) / self.RANGE
+    state = peripherals.MAPLE.get_state()
+    cur_value = int(state['throttle'])
 
-    self.prev_value = self.value
-    self.value = int(self.led_count * pct)
+    # we only save the new value if it's changed more than threshold
+    # this prevents oscillating due to analog jitter
+    change = abs(cur_value - self.raw_value)
+    if change > self.CHANGE_THRESHOLD:
+      self.prev_raw_value = self.raw_value
+      self.raw_value = cur_value
+      self.value = ('low' if cur_value < 200 else
+                    'mid' if cur_value < 900 else
+                    'high')
     self.set_leds()
-    self.set_music()
 
   def set_leds(self):
     """loads the attached led string with the correct colors"""
-    if self.value == self.prev_value:
+    if self.raw_value == self.prev_raw_value:
       pass
 
-    cur_color = self.color_range[self.value]
+    num_on = self.led_count * self.value / 1024
 
-    new_colors = [cur_color] * self.value     # these leds are on
-    new_colors += [self.black] * (self.led_count - self.value) # these are off
+    cur_color = self.color_range[num_on]
+
+    new_colors = [cur_color] * num_on    # these leds are on
+    new_colors += [self.black] * (self.led_count - num_on) # these are off
 
     peripherals.MAPLE.set_led_batch(self.first_led_id, new_colors[::-1])
-
-  def set_music(self):
-    pass
 
 class RotaryEncoder(object):
   """A rotary encoder!"""
