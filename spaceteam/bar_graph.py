@@ -24,6 +24,7 @@ class BarGraph(object):
       ]
 
   BLINK_INTERVAL = 0.1 # in seconds
+  SWEEP_INTERVAL = 0.5 # in seconds
   SWEEP_WIDTH = 1
 
   def __init__(self, array, pins, mode = 'countdown'):
@@ -33,8 +34,16 @@ class BarGraph(object):
 
     self.value = 0
 
-    self._blink_time = 0
+    self._transition_time = 0
     self._blink_on = True
+
+  def _time_for_transition(self, interval):
+    t = time.time()
+    if t > (self._transition_time + interval):
+      self._transition_time = t
+      return True
+    else:
+      return False
 
   def update_value(self, new_value):
     if new_value < 0 or new_value > len(self.pins):
@@ -47,11 +56,12 @@ class BarGraph(object):
     should_be_on = []
 
     if self.mode == 'sweep':
-      # go up one led, and turn that one on
-      self.update_value((self.value + 1) % len(self.pins))
-      should_be_on = [self.value]
+      # actually do the sweep
+      if self._time_for_transition(self.SWEEP_INTERVAL):
+        self.update_value((self.value + 1) % len(self.pins))
 
-      # also turn on the leds below the current, specified by width
+      # figure out which LEDs should be on based on value
+      should_be_on = [self.value]
       for i in xrange(self.SWEEP_WIDTH):
         should_be_on.append((self.value - 1) % len(self.pins))
 
@@ -62,8 +72,7 @@ class BarGraph(object):
       # if we're blinking, the last-on led should blink
       if self.mode == 'countdown':
         # manipulate internal blink state
-        if time.now() > self._blink_time + self.BLINK_INTERVAL:
-          self._blink_time = time.now()
+        if self._time_for_transition(self.BLINK_INTERVAL):
           self._blink_on = not self._blink_on
 
         # turn the blinking led on/off

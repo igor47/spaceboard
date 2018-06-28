@@ -20,9 +20,14 @@ class LedArray(object):
 
     # we have two bytes per chip (8 outputs per chip)
     self.is_on = bytearray([0] * chip_count * 2)
+    self.last_is_on = None
 
     # we have some leds inside; lets use them to count main loops
     self.inside_led_on = 0
+
+    # we have a clock
+    self.last_advance = 0
+
 
   def turn_on(self, idx):
     byte, bit = self.__idx_to_byte_bit(idx)
@@ -46,10 +51,19 @@ class LedArray(object):
   def communicate(self):
     """Reads the state of all enabled pins and saves it locally"""
     self.__advance_inside_leds()
-    self.microcontroller.update_array(list(self.is_on))
+    if self.last_is_on != self.is_on:
+      self.last_is_on = bytearray(self.is_on)
+      self.microcontroller.update_array(list(self.is_on))
 
   def __advance_inside_leds(self):
-    """basically, a binary clock showing loop iterations"""
+    """basically, a binary clock!"""
+    # should we be advancing?
+    t = time.time()
+    if (time.time() - self.last_advance) < 1:
+      return
+
+    self.last_advance = t
+
     # add one to the clock, wrapping if necessary
     self.inside_led_on += 1
     self.inside_led_on %= (1 << self.chip_count)
