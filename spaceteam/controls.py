@@ -241,6 +241,7 @@ class Keypad(object):
 class Throttle(object):
   """A bigass knife switch with a potentiometer and some leds under it."""
   CHANGE_THRESHOLD = 2
+  UPDATE_INTERVAL = 0.2
 
   def __init__(self, first_led_id, led_count):
     self.prev_raw_value = 0
@@ -248,6 +249,10 @@ class Throttle(object):
     self.value = None
     self.first_led_id = first_led_id
     self.led_count = led_count
+
+    # time var
+    self.last_state_grabbed = 0
+
     # configure the colors
     self.black = Color("black")
     self.color_range = [
@@ -273,9 +278,22 @@ class Throttle(object):
         Color(rgb = (0.90, 0.05, 0)),
       ]
 
+  def get_state(self):
+    t = time.time()
+    if (t - self.last_state_grabbed) > self.UPDATE_INTERVAL:
+      self.last_state_grabbed = t
+      try:
+        state = peripherals.MAPLE.get_state()
+      except StandardError, e:
+        print e
+        return self.raw_value
+      else:
+        return int(state['throttle'][0])
+    else:
+      return self.raw_value
+
   def read(self):
-    state = peripherals.MAPLE.get_state()
-    cur_value = int(state['throttle'])
+    cur_value = self.get_state()
 
     # we only save the new value if it's changed more than threshold
     # this prevents oscillating due to analog jitter
@@ -293,7 +311,7 @@ class Throttle(object):
     if self.raw_value == self.prev_raw_value:
       pass
 
-    num_on = self.led_count * self.value / 1024
+    num_on = self.led_count * self.raw_value / 1024
 
     cur_color = self.color_range[num_on]
 

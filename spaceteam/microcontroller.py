@@ -122,7 +122,7 @@ class Microcontroller(object):
     return {
         'received': struct.unpack('>I', data[1:5]),
         'bad': struct.unpack('>I', data[5:9]),
-        'throttle': struct.unpack('>H', data[10:11]),
+        'throttle': struct.unpack('>H', data[9:11]),
       }
 
   def reset(self):
