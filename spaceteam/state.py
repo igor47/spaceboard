@@ -501,6 +501,59 @@ INPUTS = [
       'False': 'Exit cyberspace',
     }
   },
+
+  {
+    'id': 'keypad',
+    'control': Keypad(
+      buttons = {
+        1: KeypadButton(MCP27, pin = 6, led_id = 14),
+        2: KeypadButton(MCP27, pin = 4, led_id = 27),
+        3: KeypadButton(MCP26, pin = 7, led_id = 28),
+        4: KeypadButton(MCP26, pin = 1, led_id = 16),
+        5: KeypadButton(MCP26, pin = 2, led_id = 25),
+        6: KeypadButton(MCP27, pin = 1, led_id = 30),
+        7: KeypadButton(MCP26, pin = 5, led_id = 18),
+        8: KeypadButton(MCP27, pin = 2, led_id = 23),
+        9: KeypadButton(MCP27, pin = 3, led_id = 32),
+        0: KeypadButton(MCP26, pin = 0, led_id = 21),
+        'input': KeypadButton(MCP27, pin = 7, led_id = 20),
+        'ok': KeypadButton(MCP26, pin = 4, led_id = 34),
+      },
+      displays = [
+        SevenSegment(peripherals.ARRAY, {
+          'dot': 4,
+          'top': 31,
+          'left_top': 29,
+          'left_bottom': 1,
+          'right_top': 28,
+          'right_bottom': 0,
+          'middle': 11,
+          'bottom': 14,
+          }),
+        SevenSegment(peripherals.ARRAY, {
+          'dot': 22,
+          'top': 15,
+          'left_top': 2,
+          'left_bottom': 13,
+          'right_top': 21,
+          'right_bottom': 27,
+          'middle': 5,
+          'bottom': 9,
+          }),
+        SevenSegment(peripherals.ARRAY, {
+          'dot': 12,
+          'top': 10,
+          'left_top': 24,
+          'left_bottom': 3,
+          'right_top': 26,
+          'right_bottom': 6,
+          'middle': 30,
+          'bottom': 25,
+          }),
+      ],
+    ),
+    'actions': {"%03d" % n: "Set course to %d!" % n for n in xrange(999)}
+	},
 ]
 
 def announce(inputs = INPUTS):

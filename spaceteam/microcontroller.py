@@ -8,6 +8,7 @@ import struct
 import threading
 import time
 
+from colour import Color
 from cmdmessenger import CmdMessenger
 
 class Microcontroller(object):
@@ -184,3 +185,17 @@ class Microcontroller(object):
   def color_to_bit_list(self, color):
     """converts a color into a list of rgb uint8_ts based on max_brightness"""
     return [int(i * self.max_brightness) for i in color.rgb]
+
+if __name__ == "__main__":
+  import peripherals
+  peripherals.reset_all()
+
+  mic = peripherals.MAPLE
+
+  idx = 0
+  while True:
+    peripherals.MAPLE.set_led(idx, Color('orange'), latch = True)
+    raw_input("turned on %s; press <Enter> to continue..." % idx)
+
+    peripherals.MAPLE.set_led(idx, Color('green'), latch = False)
+    idx += 1
