@@ -28,7 +28,12 @@ class Display(object):
     src_dir = os.path.dirname(__file__)
     font_dir = os.path.abspath(os.path.join(src_dir, '../fonts'))
     font_path = os.path.join(font_dir, name)
-    return ImageFont.truetype(font_path, size)
+
+    _, ext = os.path.splitext(name)
+    if ext == 'ttf':
+      return ImageFont.truetype(font_path, size)
+    else:
+      return ImageFont.load(font_path)
 
   def reset(self):
     self.device = self.get_device()

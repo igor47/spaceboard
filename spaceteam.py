@@ -78,7 +78,8 @@ def main(args):
           peripherals.DISPLAY.message = inst['message']
 
         elif inst['type'] == 'progress':
-          peripherals.PROGRESS.pct = inst['message']
+          peripherals.RED_BAR.update_value(inst['message'] / 10)
+          peripherals.ORANGE_BAR.update_value(inst['message'] / 10)
 
         elif inst['type'] == 'status':
           peripherals.DISPLAY.status = inst['message']

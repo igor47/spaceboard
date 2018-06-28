@@ -76,11 +76,14 @@ class BarGraph(object):
           self._blink_on = not self._blink_on
 
         # turn the blinking led on/off
-        blinking_idx = min(len(self.pins) - 1, value)
-        if self.countdown_blink_on:
+        blinking_idx = min(len(self.pins) - 1, self.value)
+        if self._blink_on:
           should_be_on.append(blinking_idx)
         else:
-          should_be_on.remove(blinking_idx)
+          try:
+            should_be_on.remove(blinking_idx)
+          except ValueError:
+            pass
 
     else:
       raise ValueError('Invalid mode %s' % self.mode)
