@@ -61,8 +61,18 @@ def main(args):
         if client:
           client.update(id, val)
         else:
-          print "updating %s: %s" % (id, val)
-          time.sleep(0.001)
+          i = [i for i in state.INPUTS if i['id'] == id]
+          if len(i) > 1:
+            print 'there are two controls with id %s!' % id
+          else:
+            i = i[0]
+            try:
+              act = i['actions'][str(val)]
+              print 'just did action %s' % act
+            except KeyError:
+              print 'changed %s to %s but no associated action' % (id, val)
+
+            time.sleep(0.001)
 
       # update the state
       prev_state = new_state
