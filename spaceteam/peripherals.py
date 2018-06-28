@@ -68,6 +68,9 @@ DISPLAY = SSD1325(gpio = GPIO, gpio_DC = 29, gpio_RST = None)
 from led_array import LedArray
 ARRAY = LedArray(MAPLE, 5)
 
+from integrity import Integrity
+INTEGRITY = Integrity(MAPLE, ARRAY, [45, 36, 35])
+
 from bar_graph import BarGraph
 RED_BAR = BarGraph(ARRAY, [51, 49, 48, 53, 70, 50, 61, 69, 67, 52], 'countdown')
 GREEN_BAR = BarGraph(ARRAY, [68, 73, 74, 65, 54, 76, 79, 64, 77, 62], 'sweep')
@@ -81,6 +84,7 @@ BARS = [
 
 OUTPUTS = BARS + [
     DISPLAY,
+    INTEGRITY,
     ARRAY,
     MAPLE,
     ]
@@ -109,7 +113,7 @@ def reset_all():
   # reset the MAPLE
   MAPLE.reset()
   tries = 0
-  while tries < 3:
+  while tries < 5:
     time.sleep(0.1)
     try:
       MAPLE.get_state()
