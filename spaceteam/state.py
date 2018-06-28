@@ -15,8 +15,8 @@ INPUTS = [
       pin = 4,
     ),
     'actions': {
-      'True': 'Hire autopilot',
-      'False': 'Fire autopilot',
+      'True': 'Red alert! Battle stations!',
+      'False': 'Stand down from red alert',
     },
   },
   {
@@ -24,10 +24,11 @@ INPUTS = [
     'control': Switch(
       device = MCP20,
       pin = 4,
+      sounds = {True: 'robot', False: 'robot-complain'},
     ),
     'actions': {
-      'True': 'Turn on yellow rocket',
-      'False': 'Turn off yellow rocket',
+      'True': 'Hire autopilot!',
+      'False': 'Fire the autopilot (for drinking)',
     },
   },
 
@@ -158,6 +159,7 @@ INPUTS = [
     'control': Switch(
       device = MCP20,
       pin = 5,
+      sounds = {False: 'explosion'},
     ),
     'actions': {
       'False': 'Fire ze missiles!',
@@ -168,6 +170,7 @@ INPUTS = [
     'control': Switch(
       device = MCP21,
       pin = 14,
+      sounds = {False: 'laser'}
     ),
     'actions': {
       'False': 'Fire lasers!',
@@ -199,6 +202,7 @@ INPUTS = [
     'control': Switch(
       device = MCP21,
       pin = 3,
+      sounds = {True: 'shield-up', False: 'shield-down'},
     ),
     'actions': {
       'True': 'Raise shields',
@@ -299,6 +303,7 @@ INPUTS = [
       device = MCP27,
       pin = 13,
       array_idx = 56,
+      sounds = {False: 'spacedoor'},
     ),
     'actions': {
       'True': 'Close pod bay doors',
@@ -336,6 +341,7 @@ INPUTS = [
       device = MCP27,
       pin = 14,
       array_idx = 19,
+      sounds = {False: 'thruster'},
     ),
     'actions': {
       'True': 'Stop thrusting.',
@@ -348,6 +354,7 @@ INPUTS = [
       device = MCP27,
       pin = 9,
       array_idx = 60,
+      sounds = {False: 'ping'},
     ),
     'actions': {
       'True': 'De-Ping!',
@@ -362,7 +369,7 @@ INPUTS = [
       array_idx = 18,
     ),
     'actions': {
-      'True': "Don't TEST me',
+      'True': "Don't TEST me",
       'False': 'Test the system!',
     },
   },
@@ -372,6 +379,7 @@ INPUTS = [
     'control': Switch(
       device = MCP26,
       pin = 10,
+      sounds = {False: 'makeitso'},
     ),
     'actions': {
       'False': 'Make it so!',
@@ -382,6 +390,7 @@ INPUTS = [
     'control': Switch(
       device = MCP26,
       pin = 12,
+      sounds = {False: 'horn'}
     ),
     'actions': {
       'False': 'Honk the spacehorn!',
@@ -485,10 +494,11 @@ INPUTS = [
     'control': SwitchWithPulldown(
       device = MCP26,
       pin = 6,
+      sounds = {True: 'modem'},
     ),
     'actions': {
-      'True': 'Prepare to enter hyperspace',
-      'False': 'Exit hyperspace',
+      'True': 'Enter cyberspace',
+      'False': 'Exit cyberspace',
     }
   },
 ]
