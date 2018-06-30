@@ -262,6 +262,20 @@ INPUTS = [
     },
   },
   {
+    'id': 'rotary_with_leds',
+    'control': ShieldModulator(
+      encoder = RotaryEncoder(
+        switch_a = Switch(device = MCP21, pin = 8),
+        switch_b = Switch(device = MCP21, pin = 13),
+      ),
+      first_led = 2,
+      led_count = 12
+    ),
+    'actions': {
+      c['name']:'Set shield modulation to %s' % c['name'] for c in ShieldModulator.COLORS
+    }
+  },
+  {
     'id': 'weapons_yellow_rocket',
     'control': Switch(
       device = MCP21,
@@ -321,7 +335,7 @@ INPUTS = [
       pin = 6,
     ),
     'actions': {
-      'False': 'Green button next to "dump waste"',
+      'False': 'Bother tech support!',
     },
   },
 

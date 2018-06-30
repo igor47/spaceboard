@@ -381,3 +381,51 @@ class RotaryEncoder(object):
       elif self.last_transition == 'a':
         self.update(1)
         self.last_transition = None
+
+class ShieldModulator(object):
+  """A rotary encoder with a ring of LEDs around it"""
+  COLORS = [
+      {'name':'cerulean', 'color': Color('blue')},
+      {'name': 'saffron', 'color': Color('yellow')},
+      {'name': 'chartreuse', 'color': Color('chartreuse')},
+      {'name': 'lavender', 'color': Color('lavender')},
+    ]
+
+  DIM_PCT = 0.5
+
+  def __init__(self, encoder, first_led, led_count = 12):
+    self.encoder = enconder
+    self.first_led = first_led
+    self.led_count = led_count
+
+    self.cur_idx = 0
+    self.value = None
+    self.prev_value = None
+
+  def read(self):
+    # read the current color index
+    self.enconder.read()
+    diff = self.encoder.value - self.encoder.prev_value
+    self.cur_idx = diff % self.led_count
+
+    # save the current color as the value (retaining prev_value)
+    cur_color = self.COLORS[self.cur_idx / (self.led_count / len(self.COLORS))]
+    self.value = cur_color['name']
+
+    # do we need to update the led array?
+    if self.value != self.prev_value:
+      # build an array of colors to populate the string
+      new_colors = []
+      for i in xrange(led_count):
+        color_index = len(self.COLORS) * i / led_count;
+        color = Color(self.COLORS[color_index]['color'])
+
+        # dim inactive colors
+        if i != self.cur_idx:
+          color.luminance = color.luminance * self.DIM_PCT
+
+        new_colors.append(color)
+
+      peripherals.MAPLE.set_led_batch(self.first_led, new_colors)
+
+    self.prev_value = self.value
