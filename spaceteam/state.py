@@ -160,6 +160,28 @@ INPUTS = [
   },
 
   {
+    'id': 'big_knob_pusher',
+    'control': Switch(
+      device = MCP21,
+      pin = 9,
+    ),
+    'actions': {
+      'True': 'Push the BIG KNOB!',
+    },
+  },
+  {
+    'id': 'big_knob_spinner',
+    'control': RotaryEncoder(
+      switch_a = Switch(device = MCP21, pin = 11),
+      switch_b = Switch(device = MCP21, pin = 10),
+    ),
+    'actions': {
+      'clockwise': 'Spin the BIG KNOB clockwise!',
+      'counter': 'Spin the BIG KNOB backwards!',
+    },
+  },
+
+  {
     'id': "nuke_arcade",
     'control': Switch(
       device = MCP20,

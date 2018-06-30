@@ -322,8 +322,62 @@ class Throttle(object):
 
 class RotaryEncoder(object):
   """A rotary encoder!"""
-  pass
+  def __init__(self, switch_a, switch_b):
+    self.switch_a = switch_a
+    self.switch_b = switch_b
 
-class HandScanner(object):
-  """Pretends to be a hand scanner, but really just temperature"""
-  pass
+    self.last_transition = None
+
+    self.counter = 0
+    self.prev_counter = None
+
+    self.direction = 'clockwise'
+    self.prev_direction = None
+
+  def value(self):
+    return self.direction
+  def prev_value(self):
+    return self.prev_direction
+
+  def _update(self, delta):
+    self.prev_direction = self.direction
+    self.prev_counter = counter
+    self.counter += delta
+    self.direction = 'clockwise' if delta == 1 else 'counter'
+
+  def read(self):
+    self.switch_a.read()
+    self.switch_b.read()
+    a_changed = self.switch_a.prev_value != self.switch_a.value
+    b_changed = self.switch_b.prev_value != self.switch_b.value
+
+    if a_changed and b_changed:
+      self.last_transition = None
+
+    elif a_changed:
+      # we started spinning clockwise
+      if self.last_transition is None:
+        self.last_transition = 'a'
+
+      # invalid transition
+      elif self.last_transition == 'a':
+        self.last_transition = None
+
+      # completed a counter-clockwise click
+      elif self.last_transition == 'b':
+        self.update(-1)
+        self.last_transition = None
+
+    elif b_changed:
+      # we started spinning counter
+      if self.last_transition is None:
+        self.last_transition = 'b'
+
+      # invalid transition
+      elif self.last_transition == 'b':
+        self.last_transition = None
+
+      # completed a clockwise click
+      elif self.last_transition == 'a':
+        self.update(1)
+        self.last_transition = None
