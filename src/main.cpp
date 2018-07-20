@@ -40,7 +40,7 @@ void pwmSweep(uint8_t pin);
 #define LED_BUILTIN 33
 
 #define LED_STRIP_PIN 14  // we chose a pin on GPIO port C in case we switch to DMA
-#define LED_COUNT 60
+#define LED_COUNT 52
 Adafruit_NeoPixel strip = Adafruit_NeoPixel(LED_COUNT, LED_STRIP_PIN, NEO_GRB + NEO_KHZ800);
 
 // the bit-shifted led array (not multi-color leds)
@@ -219,17 +219,6 @@ void send_state()
     (uint8_t)(throttle >> 0),
   };
   packetSerial.send(packet, 11);
-
-  // also send over serial link
-  Serial.print("C:");
-  Serial.print(state.commandsReceived, DEC);
-  Serial.print(";");
-
-  Serial.print("B:");
-  Serial.print(state.badCommandsReceived, DEC);
-  Serial.print(";");
-
-  Serial.print("\r\n");
 }
 
 void toggle_led()
