@@ -8,6 +8,7 @@ import struct
 import threading
 import time
 
+from colour import Color
 from cmdmessenger import CmdMessenger
 
 class Microcontroller(object):
@@ -115,12 +116,13 @@ class Microcontroller(object):
 
     # we expect the microcontroller to respond quickly
     data = self._recv_command()
-    if data[0] != 'S' or len(data) != 9:
+    if data[0] != 'S' or len(data) != 11:
       raise RuntimeError("Invalid response (with code %s len %d) to a state request" % (data[0]), len(data))
 
     return {
         'received': struct.unpack('>I', data[1:5]),
         'bad': struct.unpack('>I', data[5:9]),
+        'throttle': struct.unpack('>H', data[9:11]),
       }
 
   def reset(self):
@@ -150,14 +152,13 @@ class Microcontroller(object):
 
     self.latch_now_or_later(latch)
 
-  def set_array_led(self, number, val, latch = False):
+  def set_oxygen(self, val):
     """Sets a specific LED in the array"""
-    if val:
-      self._send_command(["1", number])
-    else:
-      self._send_command(["0", number])
+    self._send_command(["X", val])
 
-    self.latch_now_or_later(latch)
+  def update_array(self, bytes):
+    """Updates the data displayed by the LED array"""
+    self._send_command(['A'] + bytes)
 
   def set_led_batch(self, first_led, colors = [], latch = False):
     """Sets all specified colors"""
@@ -185,3 +186,17 @@ class Microcontroller(object):
   def color_to_bit_list(self, color):
     """converts a color into a list of rgb uint8_ts based on max_brightness"""
     return [int(i * self.max_brightness) for i in color.rgb]
+
+if __name__ == "__main__":
+  import peripherals
+  peripherals.reset_all()
+
+  mic = peripherals.MAPLE
+
+  idx = 0
+  while True:
+    peripherals.MAPLE.set_led(idx, Color('orange'), latch = True)
+    raw_input("turned on %s; press <Enter> to continue..." % idx)
+
+    peripherals.MAPLE.set_led(idx, Color('green'), latch = False)
+    idx += 1

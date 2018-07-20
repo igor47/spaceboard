@@ -9,372 +9,538 @@ from seven_segment import SevenSegment
 
 INPUTS = [
   {
-    'id': 'power',
-    'control': SwitchWithLight(
-      device = MCP27,
-      pin = 11,
-      led_id = 1,
-      ),
+    'id': "top_left_rocket_red",
+    'control': Switch(
+      device = MCP20,
+      pin = 4,
+    ),
     'actions': {
-      'True': 'Push the power button',
+      'True': 'Red alert! Battle stations!',
+      'False': 'Stand down from red alert',
+    },
+  },
+  {
+    'id': "top_left_rocket_yellow",
+    'control': Switch(
+      device = MCP20,
+      pin = 6,
+      sounds = {True: 'robot', False: 'robot-complain'},
+    ),
+    'actions': {
+      'True': 'Hire autopilot!',
+      'False': 'Fire the autopilot (for drinking)',
+    },
+  },
+
+  {
+    'id': "blue_arcade_landing",
+    'control': Switch(
+      device = MCP20,
+      pin = 8,
+    ),
+    'actions': {
+      'False': 'Deploy chute!',
+    },
+  },
+  {
+    'id': "landing_rocker_1",
+    'control': SwitchWithPulldown(
+      device = MCP20,
+      pin = 9,
+    ),
+    'actions': {
+      'True': 'Lower landing gear.',
+      'False': 'Raise landing gear.',
     }
   },
   {
-    'id': 'silver_toggle_top_1',
-    'control': SwitchWithTwoLights(
-      device = MCP26,
-      pin = 10,
-      led_up_id = 5,
-      led_down_id = 6,
-      sounds = {False: 'thruster'},
+    'id': "landing_rocker_2",
+    'control': SwitchWithPulldown(
+      device = MCP20,
+      pin = 13,
     ),
     'actions': {
-      'True': 'Deactivate thrusters',
-      'False': 'Activate thrusters!',
+      'True': 'Flap the flaps!',
+      'False': 'Unflap the flaps.',
+    }
+  },
+  {
+    'id': "landing_rocker_3",
+    'control': SwitchWithPulldown(
+      device = MCP20,
+      pin = 10,
+    ),
+    'actions': {
+      'True': 'Unfurl the ramp.',
+      'False': 'Bring in the ramp.',
+    }
+  },
+  {
+    'id': "landing_rocker_4",
+    'control': SwitchWithPulldown(
+      device = MCP20,
+      pin = 12,
+    ),
+    'actions': {
+      'True': 'Emergency flashers!',
+      'False': 'End the emergency.',
+    }
+  },
+  {
+    'id': "landing_rocker_5",
+    'control': SwitchWithPulldown(
+      device = MCP20,
+      pin = 14,
+    ),
+    'actions': {
+      'True': 'Set the parking brake.',
+      'False': 'Release parking brake.',
+    }
+  },
+
+  {
+    'id': 'turn_signal_left',
+    'control': SwitchWithLed(
+      device = MCP20,
+      pin = 15,
+      array_idx = 47,
+      blink = True,
+    ),
+    'actions': {
+      'False': 'Indicate left turn!',
+      'True': 'Turn signal off!',
+    },
+  },
+  {
+    'id': 'turn_signal_right',
+    'control': SwitchWithLed(
+      device = MCP20,
+      pin = 11,
+      array_idx = 58,
+      blink = True,
+    ),
+    'actions': {
+      'False': 'Indicate right turn!',
+      'True': 'Turn signal off!',
+    },
+  },
+
+  {
+    'id': "airlock_rocker_1",
+    'control': SwitchWithPulldown(
+      device = MCP20,
+      pin = 3,
+    ),
+    'actions': {
+      'True': 'Open external airlock door',
+      'False': 'Close external airlock door!',
+    }
+  },
+  {
+    'id': "airlock_rocker_2",
+    'control': SwitchWithPulldown(
+      device = MCP20,
+      pin = 2,
+    ),
+    'actions': {
+      'True': 'Open inner airlock door.',
+      'False': 'Close inner airlock door!',
+    }
+  },
+  {
+    'id': "airlock_rocker_3",
+    'control': SwitchWithPulldown(
+      device = MCP20,
+      pin = 1,
+    ),
+    'actions': {
+      'True': 'Pressurize the airock!',
+      'False': 'Vent the airlock.',
+    }
+  },
+
+  {
+    'id': 'big_knob_pusher',
+    'control': Switch(
+      device = MCP21,
+      pin = 9,
+    ),
+    'actions': {
+      'True': 'Push the BIG KNOB!',
+    },
+  },
+  {
+    'id': 'big_knob_spinner',
+    'control': RotaryEncoder(
+      switch_a = Switch(device = MCP21, pin = 11),
+      switch_b = Switch(device = MCP21, pin = 10),
+    ),
+    'actions': {
+      'clockwise': 'Spin the BIG KNOB clockwise!',
+      'counter': 'Spin the BIG KNOB backwards!',
+    },
+  },
+
+  {
+    'id': "nuke_arcade",
+    'control': Switch(
+      device = MCP20,
+      pin = 0,
+    ),
+    'actions': {
+      'True': 'Launch the nukes.',
+    },
+  },
+  {
+    'id': "nuke_key",
+    'control': SwitchWithLed(
+      device = MCP20,
+      pin = 7,
+      array_idx = 32,
+      blink = True,
+      backwards = True,
+    ),
+    'actions': {
+      'True': 'Hasten nuclear apocalypse',
+      'False': 'Stand down from nuclear apocalypse',
+    },
+  },
+
+  {
+    'id': "weapons_red_arcade",
+    'control': Switch(
+      device = MCP20,
+      pin = 5,
+      sounds = {False: 'explosion'},
+    ),
+    'actions': {
+      'False': 'Fire ze missiles!',
+    },
+  },
+  {
+    'id': "weapons_yellow_arcade",
+    'control': Switch(
+      device = MCP21,
+      pin = 14,
+      sounds = {False: 'laser'}
+    ),
+    'actions': {
+      'False': 'Fire lasers!',
+    },
+  },
+  {
+    'id': "weapons_white_aracde",
+    'control': Switch(
+      device = MCP21,
+      pin = 0,
+    ),
+    'actions': {
+      'False': 'Chaff!',
+    },
+  },
+  {
+    'id': 'weapons_red_rocket_top',
+    'control': Switch(
+      device = MCP21,
+      pin = 12,
+    ),
+    'actions': {
+      'True': 'Arm missiles',
+      'False': 'Disarm missiles',
+    },
+  },
+  {
+    'id': 'weapons_red_rocket_bottom',
+    'control': Switch(
+      device = MCP21,
+      pin = 3,
+      sounds = {True: 'shield-up', False: 'shield-down'},
+    ),
+    'actions': {
+      'True': 'Raise shields',
+      'False': 'Lower shields',
+    },
+  },
+  {
+    'id': 'rotary_with_leds',
+    'control': ShieldModulator(
+      encoder = RotaryEncoder(
+        switch_a = Switch(device = MCP21, pin = 8),
+        switch_b = Switch(device = MCP21, pin = 13),
+      ),
+      first_led = 2,
+      led_count = 12
+    ),
+    'actions': {
+      c['name']:'Set shield modulation to %s' % c['name'] for c in ShieldModulator.COLORS
+    }
+  },
+  {
+    'id': 'weapons_yellow_rocket',
+    'control': Switch(
+      device = MCP21,
+      pin = 7,
+    ),
+    'actions': {
+      'True': 'Arm lasers',
+      'False': 'Disarm lasers',
+    },
+  },
+
+  {
+    'id': "manuevers_yellow_arcade",
+    'control': Switch(
+      device = MCP21,
+      pin = 4,
+    ),
+    'actions': {
+      'False': 'Pu1l a CraZy IvaN.',
+    },
+  },
+  {
+    'id': "manuevers_green_arcade",
+    'control': Switch(
+      device = MCP21,
+      pin = 1,
+    ),
+    'actions': {
+      'False': 'Evasive manuevers!',
+    },
+  },
+  {
+    'id': "manuevers_blue_arcade",
+    'control': Switch(
+      device = MCP21,
+      pin = 2,
+    ),
+    'actions': {
+      'False': 'Do a barrel roll!',
+    },
+  },
+
+  {
+    'id': "misc_white_arcade",
+    'control': Switch(
+      device = MCP21,
+      pin = 5,
+    ),
+    'actions': {
+      'False': 'Dump waste!',
+    },
+  },
+  {
+    'id': "misc_green_arcade",
+    'control': Switch(
+      device = MCP21,
+      pin = 6,
+    ),
+    'actions': {
+      'False': 'Bother tech support!',
+    },
+  },
+
+  {
+    'id': "silver_toggle_top_1",
+    'control': SwitchWithLed(
+      device = MCP27,
+      pin = 15,
+      array_idx = 59,
+    ),
+    'actions': {
+      'True': 'Freeze the cryofan',
+      'False': 'Spin the cryofan',
     },
   },
   {
     'id': "silver_toggle_top_2",
-    'control': SwitchWithTwoLights(
-      device = MCP26,
-      pin = 12,
-      led_up_id = 4,
-      led_down_id = 7,
-      ),
+    'control': SwitchWithLed(
+      device = MCP27,
+      pin = 10,
+      array_idx = 33,
+    ),
     'actions': {
-      'True': 'Vent the airlock!',
-      'False': 'Pressurize airlock.',
-    }
+      'False': 'Transduce the transducer!',
+      'True': 'Untransduce!',
+    },
   },
   {
     'id': "silver_toggle_top_3",
-    'control': SwitchWithTwoLights(
-      device = MCP26,
-      pin = 13,
-      led_up_id = 3,
-      led_down_id = 8,
-    ),
-    'actions': {
-      'True': 'Transducer to blue',
-      'False': 'Transducer to orange',
-    }
-  },
-  {
-    'id': "silver_toggle_top_4",
-    'control': SwitchWithTwoLights(
-      device = MCP26,
-      pin = 11,
-      led_up_id = 2,
-      led_down_id = 9,
-    ),
-    'actions': {
-      'True': 'Freeze the cryo-fan',
-      'False': 'Spin the cryo-fan',
-    }
-  },
-  {
-    'id': "silver_toggle_bottom_1",
-    'control': SwitchWithTwoLights(
-      device = MCP26,
-      pin = 9,
-      led_up_id = 13,
-      led_down_id = 14,
-    ),
-    'actions': {
-      'True': 'Ungimbal the gimbal',
-      'False': 'Gimbal the gimbal',
-    }
-  },
-  {
-    'id': "silver_toggle_bottom_2",
-    'control': SwitchWithTwoLights(
+    'control': SwitchWithLed(
       device = MCP27,
-      pin = 8,
-      led_up_id = 12,
-      led_down_id = 15,
+      pin = 13,
+      array_idx = 56,
       sounds = {False: 'spacedoor'},
     ),
     'actions': {
       'True': 'Close pod bay doors',
       'False': 'Open pod bay doors',
-    }
+    },
+  },
+  {
+    'id': "silver_toggle_top_4",
+    'control': SwitchWithLed(
+      device = MCP27,
+      pin = 11,
+      array_idx = 57,
+    ),
+    'actions': {
+      'True': "You've had enough coffee.",
+      'False': 'Brew coffee',
+    },
+  },
+
+  {
+    'id': "silver_toggle_bottom_1",
+    'control': SwitchWithLed(
+      device = MCP27,
+      pin = 12,
+      array_idx = 44,
+    ),
+    'actions': {
+      'True': 'Ungimbal the gimbal',
+      'False': 'Gimbal!',
+    },
+  },
+  {
+    'id': "silver_toggle_bottom_2",
+    'control': SwitchWithLed(
+      device = MCP27,
+      pin = 14,
+      array_idx = 19,
+      sounds = {False: 'thruster'},
+    ),
+    'actions': {
+      'True': 'Stop thrusting.',
+      'False': 'Thrust your thrusters.',
+    },
   },
   {
     'id': "silver_toggle_bottom_3",
-    'control': SwitchWithTwoLights(
-      device = MCP26,
-      pin = 8,
-      led_up_id = 11,
-      led_down_id = 16,
+    'control': SwitchWithLed(
+      device = MCP27,
+      pin = 9,
+      array_idx = 60,
       sounds = {False: 'ping'},
     ),
     'actions': {
-      'True': 'Unping.',
+      'True': 'De-Ping!',
       'False': 'Ping!',
-    }
+    },
   },
   {
     'id': "silver_toggle_bottom_4",
-    'control': SwitchWithTwoLights(
-      device = MCP26,
-      pin = 14,
-      led_up_id = 10,
-      led_down_id = 17,
-    ),
-    'actions': {
-      'True': 'End system test',
-      'False': 'Test the system!',
-    }
-  },
-  {
-    'id': "little_red_push",
-    'control': Switch(
+    'control': SwitchWithLed(
       device = MCP27,
-      pin = 9,
-    ),
-    'actions': {
-      'True': 'Ingest waste',
-    },
-  },
-  {
-    'id': "little_green_push",
-    'control': Switch(
-      device = MCP27,
-      pin = 10,
-    ),
-    'actions': {
-      'True': 'Flush waste!'
-    },
-  },
-  {
-    'id': "big_green_push",
-    'control': Switch(
-      device = MCP25,
-      pin = 0,
-      sounds = {False: 'warp'}
-    ),
-    'actions': {
-      'False': 'Engage hyperdrive!'
-    },
-  },
-  {
-    'id': "big_red_push",
-    'control': Switch(
-      device = MCP25,
-      pin = 15,
-      sounds = {False: 'unwarp'}
-    ),
-    'actions': {
-      'False': 'Disengage hyperdrive!'
-    },
-  },
-  {
-    'id': "red_rocket_5",
-    'control': SwitchWithPulldown(
-      device = MCP25,
-      pin = 6,
-      sounds = {True: 'robot', False: 'robot-complain'},
-    ),
-    'actions': {
-      'True': 'Hire autopilot',
-      'False': 'Fire autopilot',
-    }
-  },
-  {
-    'id': "red_rocket_4",
-    'control': SwitchWithPulldown(
-      device = MCP25,
-      pin = 7,
-    ),
-    'actions': {
-      'True': 'Pull a Crazy Ivan',
-      'False': 'Pacify Crazy Ivan',
-    }
-  },
-  {
-    'id': "red_rocket_3",
-    'control': SwitchWithPulldown(
-      device = MCP24,
-      pin = 1,
-      sounds = {True: 'shield-up', False: 'shield-down'},
-    ),
-    'actions': {
-      'True': 'Raise shields!',
-      'False': 'Lower shields!',
-    }
-  },
-  {
-    'id': "red_rocket_2",
-    'control': SwitchWithPulldown(
-      device = MCP24,
-      pin = 2,
-      sounds = {True: 'siren'},
-    ),
-    'actions': {
-      'True': 'Eject the pilot!',
-      'False': 'Reseat the pilot!',
-    }
-  },
-  {
-    'id': "red_rocket_1",
-    'control': SwitchWithPulldown(
-      device = MCP24,
-      pin = 5,
-      sounds = {False: 'explosion'},
-    ),
-    'actions': {
-      'True': 'Launch missiles!',
-      'False': 'Abort missile launch!',
-    }
-  },
-  {
-    'id': "yellow_rocket_3",
-    'control': SwitchWithPulldown(
-      device = MCP24,
-      pin = 0,
-    ),
-    'actions': {
-      'True': 'Modulate the shields',
-      'False': 'Demodulate the shields!',
-    }
-  },
-  {
-    'id': "yellow_rocket_2",
-    'control': SwitchWithPulldown(
-      device = MCP24,
-      pin = 3,
-    ),
-    'actions': {
-      'True': 'Eject cargo!',
-      'False': 'Uneject cargo!'
-    }
-  },
-  {
-    'id': "yellow_rocket_1",
-    'control': SwitchWithPulldown(
-      device = MCP24,
-      pin = 6,
-    ),
-    'actions': {
-      'True': 'Arm the missiles',
-      'False': 'Disarm the missiles'
-    }
-  },
-  {
-    'id': "red_rocker_1",
-    'control': SwitchWithPulldown(
-      device = MCP25,
-      pin = 2,
-    ),
-    'actions': {
-      'True': 'Activate plasma containment',
-      'False': 'Uncontain the plasma'
-    }
-  },
-  {
-    'id': "red_rocker_2",
-    'control': SwitchWithPulldown(
-      device = MCP25,
-      pin = 1,
-    ),
-    'actions': {
-      'True': 'Phase-shift the plasma',
-      'False': 'Phase-lock the plasma'
-    }
-  },
-  {
-    'id': "red_rocker_3",
-    'control': SwitchWithPulldown(
-      device = MCP25,
-      pin = 4,
-    ),
-    'actions': {
-      'True': 'Intercool the plasma',
-      'False': 'Disable plasma intercool',
-    }
-  },
-  {
-    'id': "red_rocker_4",
-    'control': SwitchWithPulldown(
-      device = MCP25,
-      pin = 3,
-    ),
-    'actions': {
-      'True': 'Discharge plasma',
-      'False': 'Un-Discharge plasma',
-    }
-  },
-  {
-    'id': "green_rocker_1",
-    'control': SwitchWithPulldown(
-      device = MCP25,
       pin = 8,
+      array_idx = 18,
     ),
     'actions': {
-      'True': 'Power to level 10',
-      'False': 'Shut off power to level 10',
-    }
+      'True': "Don't TEST me",
+      'False': 'Test the system!',
+    },
   },
+
   {
-    'id': "green_rocker_2",
-    'control': SwitchWithPulldown(
-      device = MCP25,
+    'id': "big_button_green",
+    'control': Switch(
+      device = MCP26,
       pin = 10,
+      sounds = {False: 'makeitso'},
     ),
     'actions': {
-      'True': 'Power to broom closet!',
-      'False': 'Turn off power to broom closet!',
-    }
+      'False': 'Make it so!',
+    },
   },
   {
-    'id': "green_rocker_3",
-    'control': SwitchWithPulldown(
-      device = MCP25,
+    'id': "big_button_red",
+    'control': Switch(
+      device = MCP26,
       pin = 9,
+      sounds = {False: 'horn'}
     ),
     'actions': {
-      'True': 'Abuse more power',
-      'False': 'Abuse power',
-    }
+      'False': 'Honk the spacehorn!',
+    },
+  },
+
+  {
+    'id': "power_toggle_green",
+    'control': SwitchWithLed(
+      device = MCP26,
+      pin = 8,
+      array_idx = 46,
+      backwards = True,
+    ),
+    'actions': {
+      'True': 'Main power on!',
+      'False': 'Main power off!',
+    },
   },
   {
-    'id': "green_rocker_4",
-    'control': SwitchWithPulldown(
-      device = MCP25,
+    'id': "power_toggle_red",
+    'control': SwitchWithLed(
+      device = MCP26,
+      pin = 15,
+      array_idx = 20,
+      backwards = True,
+    ),
+    'actions': {
+      'True': 'Route auxillary power!',
+      'False': 'Deactivate auxillary power',
+    },
+  },
+  {
+    'id': "power_toggle_blue",
+    'control': SwitchWithLed(
+      device = MCP26,
+      pin = 13,
+      array_idx = 17,
+      backwards = True,
+    ),
+    'actions': {
+      'True': 'ABSOLUTE POWER',
+      'False': 'Relative power.',
+    },
+  },
+
+  {
+    'id': 'on_off_toggle_1',
+    'control': Switch(
+      device = MCP26,
       pin = 12,
     ),
     'actions': {
-      'True': 'Power to enemy ships',
-      'False': 'Stop powering enemy ships!',
-    }
+      'False': 'Re-route power to level 10',
+      'True': 'Shut off power to level 10',
+    },
   },
   {
-    'id': "blue_rocker_1",
-    'control': SwitchWithPulldown(
-      device = MCP25,
-      pin = 5,
+    'id': 'on_off_toggle_2',
+    'control': Switch(
+      device = MCP26,
+      pin = 11,
     ),
     'actions': {
-      'True': 'Chill the coolant',
-      'False': 'Warm the coolant',
-    }
+      'False': 'Activate massage chair',
+      'True': 'Deactivate message chair',
+    },
   },
   {
-    'id': "blue_rocker_2",
+    'id': 'flight_rocker_1',
     'control': SwitchWithPulldown(
-      device = MCP25,
+      device = MCP26,
       pin = 14,
     ),
     'actions': {
-      'True': 'Vent coolant!',
-      'False': 'Inspire coolant!',
+      'True': 'Activate infinite improbability drive',
+      'False': 'Restore normal probability',
     }
   },
   {
-    'id': "blue_rocker_3",
+    'id': "flight_rocker_2",
     'control': SwitchWithPulldown(
-      device = MCP25,
-      pin = 11,
+      device = MCP26,
+      pin = 3,
     ),
     'actions': {
       'True': 'Stir coolant',
@@ -382,183 +548,93 @@ INPUTS = [
     }
   },
   {
-    'id': "blue_rocker_4",
+    'id': "flight_rocker_3",
     'control': SwitchWithPulldown(
-      device = MCP25,
-      pin = 13,
+      device = MCP27,
+      pin = 0,
     ),
     'actions': {
-      'True': 'Pump coolant',
-      'False': 'Leak coolant',
+      'True': 'Activate plasma containment field',
+      'False': 'Disperse plasma containment field',
     }
   },
   {
-    'id': "red_arcade_2",
-    'control': Switch(
-      device = MCP24,
-      pin = 4,
-      sounds = {True: 'ka-ching',},
-    ),
-    'actions': {
-      'True': 'Invoice passengers!'
-    },
-  },
-  {
-    'id': "red_arcade_1",
-    'control': Switch(
-      device = MCP24,
-      pin = 7,
-    ),
-    'actions': {
-      'True': 'Terminate passengers',
-    },
-  },
-  {
-    'id': "white_arcade_2",
-    'control': Switch(
-      device = MCP24,
-      pin = 9,
-      sounds = {True: 'makeitso'},
-    ),
-    'actions': {
-      'True': 'Make it so!',
-    },
-  },
-  {
-    'id': "white_arcade_1",
-    'control': Switch(
-      device = MCP24,
-      pin = 8,
+    'id': "flight_rocker_4",
+    'control': SwitchWithPulldown(
+      device = MCP26,
+      pin = 6,
       sounds = {True: 'modem'},
     ),
     'actions': {
-      'True': 'Enter cyberspace!',
-    },
+      'True': 'Enter cyberspace',
+      'False': 'Exit cyberspace',
+    }
   },
-  {
-    'id': "yellow_arcade_2",
-    'control': Switch(
-      device = MCP24,
-      pin = 15,
-    ),
-    'actions': {
-      'True': 'Sedate passengers',
-    },
-  },
-  {
-    'id': "yellow_arcade_1",
-    'control': Switch(
-      device = MCP24,
-      pin = 12,
-    ),
-    'actions': {
-      'True': 'Sedate passengers!',
-    },
-  },
-  {
-    'id': "blue_arcade_2",
-    'control': Switch(
-      device = MCP24,
-      pin = 11,
-      sounds = {False: 'laser'}
-    ),
-    'actions': {
-      'True': 'Fire lasers!',
-    },
-  },
-  {
-    'id': "blue_arcade_1",
-    'control': Switch(
-      device = MCP24,
-      pin = 10,
-      sounds = {False: 'horn'}
-    ),
-    'actions': {
-      'True': 'Honk the spacehorn!',
-    },
-  },
-  {
-    'id': "green_arcade_2",
-    'control': Switch(
-      device = MCP24,
-      pin = 14,
-    ),
-    'actions': {
-      'True': 'Feed the passengers',
-    },
-  },
-  {
-    'id': "green_arcade_1",
-    'control': Switch(
-      device = MCP24,
-      pin = 13,
-    ),
-    'actions': {
-      'True': 'Brew tea!',
-    },
-  },
+
   {
     'id': 'keypad',
     'control': Keypad(
       buttons = {
-        1: KeypadButton(MCP27, pin = 15, led_id = 18),
-        2: KeypadButton(MCP27, pin = 14, led_id = 25),
-        3: KeypadButton(MCP27, pin = 13, led_id = 26),
-        4: KeypadButton(MCP27, pin = 12, led_id = 19),
-        5: KeypadButton(MCP27, pin = 0, led_id = 24),
-        6: KeypadButton(MCP27, pin = 1, led_id = 27),
-        7: KeypadButton(MCP27, pin = 2, led_id = 20),
-        8: KeypadButton(MCP27, pin = 3, led_id = 23),
-        9: KeypadButton(MCP27, pin = 4, led_id = 28),
-        0: KeypadButton(MCP27, pin = 6, led_id = 22),
-        'input': KeypadButton(MCP27, pin = 5, led_id = 21),
-        'ok': KeypadButton(MCP27, pin = 7, led_id = 29),
+        1: KeypadButton(MCP27, pin = 6, led_id = 14),
+        2: KeypadButton(MCP27, pin = 4, led_id = 27),
+        3: KeypadButton(MCP26, pin = 7, led_id = 28),
+        4: KeypadButton(MCP26, pin = 1, led_id = 16),
+        5: KeypadButton(MCP26, pin = 2, led_id = 25),
+        6: KeypadButton(MCP27, pin = 1, led_id = 30),
+        7: KeypadButton(MCP26, pin = 5, led_id = 18),
+        8: KeypadButton(MCP27, pin = 2, led_id = 23),
+        9: KeypadButton(MCP27, pin = 3, led_id = 32),
+        0: KeypadButton(MCP26, pin = 0, led_id = 21),
+        'input': KeypadButton(MCP27, pin = 7, led_id = 20),
+        'ok': KeypadButton(MCP26, pin = 4, led_id = 34),
       },
       displays = [
-        SevenSegment({
-          'dot': (MCP22, 6),
-          'top': (MCP23, 6),
-          'left_top': (MCP22, 7),
-          'left_bottom': (MCP22, 5),
-          'right_top': (MCP23, 4),
-          'right_bottom': (MCP22, 9),
-          'middle': (MCP22, 13),
-          'bottom': (MCP22, 3),
+        SevenSegment(peripherals.ARRAY, {
+          'dot': 4,
+          'top': 31,
+          'left_top': 29,
+          'left_bottom': 1,
+          'right_top': 28,
+          'right_bottom': 0,
+          'middle': 11,
+          'bottom': 14,
           }),
-        SevenSegment({
-          'dot': (MCP22, 8),
-          'top': (MCP23, 2),
-          'left_top': (MCP22, 11),
-          'left_bottom': (MCP23, 11),
-          'right_top': (MCP23, 3),
-          'right_bottom': (MCP23, 12),
-          'middle': (MCP23, 8),
-          'bottom': (MCP23, 13),
+        SevenSegment(peripherals.ARRAY, {
+          'dot': 22,
+          'top': 15,
+          'left_top': 2,
+          'left_bottom': 13,
+          'right_top': 21,
+          'right_bottom': 27,
+          'middle': 5,
+          'bottom': 9,
           }),
-        SevenSegment({
-          'dot': (MCP22, 2),
-          'top': (MCP23, 7),
-          'left_top': (MCP22, 10),
-          'left_bottom': (MCP23, 10),
-          'right_top': (MCP23, 9),
-          'right_bottom': (MCP22, 12),
-          'middle': (MCP23, 5),
-          'bottom': (MCP22, 4),
+        SevenSegment(peripherals.ARRAY, {
+          'dot': 12,
+          'top': 10,
+          'left_top': 24,
+          'left_bottom': 3,
+          'right_top': 26,
+          'right_bottom': 6,
+          'middle': 30,
+          'bottom': 25,
           }),
       ],
     ),
     'actions': {"%03d" % n: "Set course to %d!" % n for n in xrange(999)}
-  },
+	},
+]
+
+disabled_controls = [
   {
-    'id': 'Accelerator',
-    'control': Accelerator(
-       device = ANALOG1,
-       pin = 0,
-       first_led_id = 30,
-       led_count = 15,
-     ),
-    'actions': {str(n): "Set throttle to %d!" % n for n in xrange(15)}
-  }
+    'id': 'throttle',
+    'control': Throttle(first_led_id=37, led_count=15),
+    'actions': {
+      'low': 'Set throttle to minimum',
+      'mid': 'Set throttle to medium',
+      'high': 'Set throttle to maximum',
+    },
+  },
 ]
 
 def announce(inputs = INPUTS):

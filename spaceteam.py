@@ -9,8 +9,7 @@ from spaceteam import state
 import time
 import sdnotify
 
-SERVER_IP = '10.110.0.10'
-#SERVER_IP = '10.0.0.1'
+SERVER_IP = '10.110.0.1'
 
 def updates(prev, new):
   diffs = {}
@@ -51,10 +50,7 @@ def main(args):
       if client and not client.running():
         raise RuntimeError("The client has stopped!")
 
-      # notify the watchdog that we're okay (otherwise we get rebooted by systemd)
-      # if the power button is held down long enough, this will happen
-      if prev_state['power']:  # button not pushed down
-        notifier.notify("WATCHDOG=1")
+      notifier.notify("WATCHDOG=1")
 
       # read any peripherals
       peripherals.read_all()
@@ -65,8 +61,18 @@ def main(args):
         if client:
           client.update(id, val)
         else:
-          print "updating %s: %s" % (id, val)
-          time.sleep(0.001)
+          i = [i for i in state.INPUTS if i['id'] == id]
+          if len(i) > 1:
+            print 'there are two controls with id %s!' % id
+          else:
+            i = i[0]
+            try:
+              act = i['actions'][str(val)]
+              print 'just did action %s' % act
+            except KeyError:
+              print 'changed %s to %s but no associated action' % (id, val)
+
+            time.sleep(0.001)
 
       # update the state
       prev_state = new_state
@@ -82,10 +88,14 @@ def main(args):
           peripherals.DISPLAY.message = inst['message']
 
         elif inst['type'] == 'progress':
-          peripherals.PROGRESS.pct = inst['message']
+          peripherals.RED_BAR.update_value(inst['message'] / 10)
+          peripherals.ORANGE_BAR.update_value(inst['message'] / 10)
 
         elif inst['type'] == 'status':
           peripherals.DISPLAY.status = inst['message']
+
+        elif inst['type'] == 'integrity':
+          peripherals.INTEGRITY.update(inst['message'])
 
         # get next instruction
         inst = client.get_instruction()

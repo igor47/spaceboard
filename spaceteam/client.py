@@ -81,15 +81,26 @@ class Client:
       elif msg['message'] == 'set-progress':
         return {'type': 'progress', 'message': msg['data']['value']}
 
+      elif msg['message'] == 'set-integrity':
+        return {'type': 'integrity', 'message': msg['data']['value']}
+
       elif msg['message'] == 'keep-alive':
         self.last_keepalive = time.time()
+
+      # unknown message
+      else:
+        return None
 
     while not self.recv_stop.isSet():
       self.read_buffer += self._socket.recv(4096)
 
       msg = self.pop_from_buffer()
       while msg:
-        self.recv_events.put(parse_msg(msg))
+        event = parse_msg(msg)
+        if event:
+          self.recv_events.put(event)
+
+        # next message
         msg = self.pop_from_buffer()
 
   def pop_from_buffer(self):

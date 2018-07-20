@@ -54,7 +54,6 @@ static inline void delayShort(uint32_t num) {
   );
 }
 
-
 void Adafruit_NeoPixel::begin(void) {
   pinMode(pin, OUTPUT);
   digitalWrite(pin, LOW);

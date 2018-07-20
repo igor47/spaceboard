@@ -29,25 +29,22 @@ _SMBUS = smbus.SMBus(BUS_ID)
 SMBUS_SDA_PIN = 03
 SMBUS_SCL_PIN = 05
 
+# not used atm
 from ads1115 import ADS1115
-ANALOG1 = ADS1115(_SMBUS, 0x48)
 
 from mcp23017 import MCP23017
+MCP20 = MCP23017(_SMBUS, 0x20)
+MCP21 = MCP23017(_SMBUS, 0x21)
 MCP22 = MCP23017(_SMBUS, 0x22)
-MCP23 = MCP23017(_SMBUS, 0x23)
-MCP24 = MCP23017(_SMBUS, 0x24)
-MCP25 = MCP23017(_SMBUS, 0x25)
 MCP26 = MCP23017(_SMBUS, 0x26)
 MCP27 = MCP23017(_SMBUS, 0x27)
 
 INPUTS = [
+    MCP20,
+    MCP21,
     MCP22,
-    MCP23,
-    MCP24,
-    MCP25,
     MCP26,
     MCP27,
-    ANALOG1,
     ]
 
 # initialize microcontroller
@@ -68,13 +65,30 @@ DISPLAY_RESET_PIN = RESET_PIN # pin 7; we pass NONE to device since we do reset 
 from ssd1325 import SSD1325
 DISPLAY = SSD1325(gpio = GPIO, gpio_DC = 29, gpio_RST = None)
 
-from progress import Progress
-PROGRESS = Progress(MAPLE)
+from led_array import LedArray
+ARRAY = LedArray(MAPLE, 5)
+ARRAY.turn_on(41) # nuke warning
+ARRAY.turn_on(40) # signal light
 
-OUTPUTS = [
-    PROGRESS,
-    MAPLE,
+from integrity import Integrity
+INTEGRITY = Integrity(MAPLE, ARRAY, [45, 36, 35])
+
+from bar_graph import BarGraph
+RED_BAR = BarGraph(ARRAY, [51, 49, 48, 53, 70, 50, 61, 69, 67, 52], 'countdown')
+GREEN_BAR = BarGraph(ARRAY, [68, 73, 74, 65, 54, 76, 79, 64, 77, 62], 'sweep')
+ORANGE_BAR = BarGraph(ARRAY, [34, 38, 16, 37, 75, 43, 78, 63, 72, 66], 'countdown')
+DOT_BAR = BarGraph(ARRAY, [4, 22, 12], 'sweep')
+BARS = [
+    RED_BAR,
+    GREEN_BAR,
+    ORANGE_BAR,
+    ]
+
+OUTPUTS = BARS + [
     DISPLAY,
+    INTEGRITY,
+    ARRAY,
+    MAPLE,
     ]
 
 from sound_player import SoundPlayer
@@ -101,7 +115,7 @@ def reset_all():
   # reset the MAPLE
   MAPLE.reset()
   tries = 0
-  while tries < 3:
+  while tries < 5:
     time.sleep(0.1)
     try:
       MAPLE.get_state()

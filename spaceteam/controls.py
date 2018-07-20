@@ -66,35 +66,38 @@ class SwitchWithLight(Switch):
       peripherals.MAPLE.set_led(self.led_id, new_color, latch = False)
       self.prev_color = new_color
 
-class SwitchWithTwoLights(Switch):
-  UP_ON_COLOR = Color(rgb = (0.8, 0.2, 0))
-  UP_OFF_COLOR = Color(rgb = (0.1, 0.025, 0))
+class SwitchWithLed(Switch):
+  BLINK_INTERVAL = 0.8 # seconds
 
-  DOWN_ON_COLOR = Color(rgb = (0, 0.2, 0.4))
-  DOWN_OFF_COLOR = Color(rgb = (0, 0.025, 0.05))
-
-  def __init__(self, device, pin, led_up_id, led_down_id, sounds = None):
+  def __init__(
+      self, device, pin, array_idx, sounds = None, backwards = False, blink = False):
     Switch.__init__(self, device, pin, sounds)
-    self.led_up_id = led_up_id
-    self.led_down_id = led_down_id
+    self.array_idx = array_idx
 
-    self.prev_up_color = None
-    self.prev_down_color = None
+    self.backwards = backwards
+    self.blink = blink
+
+    self.last_blink = 0
+    self.blink_state = True
 
   def after_read(self):
     Switch.after_read(self)
     self.set_color()
 
   def set_color(self):
-    up_color = self.UP_ON_COLOR if self.active() else self.UP_OFF_COLOR
-    if up_color != self.prev_up_color:
-      self.prev_up_color = up_color
-      peripherals.MAPLE.set_led(self.led_up_id, up_color)
+    new_state = True if self.active() else False
+    if self.backwards:
+      new_state = not new_state
 
-    down_color = self.DOWN_OFF_COLOR if self.active() else self.DOWN_ON_COLOR
-    if down_color != self.prev_down_color:
-      self.prev_down_color = down_color
-      peripherals.MAPLE.set_led(self.led_down_id, down_color)
+    if self.blink:
+      t = time.time()
+      if (t - self.last_blink) > self.BLINK_INTERVAL:
+        self.last_blink = t
+        self.blink_state = not self.blink_state
+
+      new_state = new_state and self.blink_state
+
+    peripherals.ARRAY.set_led(self.array_idx, new_state)
 
 class KeypadButton(SwitchWithLight):
   """Just like a switch with a light, but calls a callback on press"""
@@ -235,48 +238,20 @@ class Keypad(object):
       d = self.displays[idx]
       d.display(char)
 
-class Analog(object):
+class Throttle(object):
+  """A bigass knife switch with a potentiometer and some leds under it."""
   CHANGE_THRESHOLD = 2
+  UPDATE_INTERVAL = 0.2
 
-  """An analog input (potentiometer)"""
-  def __init__(self, device, pin):
-    self.device = device
-    self.pin = pin
-
-    # initialize hysterisis
-    self.prev_value = 500
-    self.value = 500
-
-    # enable reading that pin
-    self.device.enable_pin(pin)
-
-  def read(self):
-    cur_value = int(self.device.read(self.pin, scaled = True))
-
-    # we only save the new value if it's changed more than threshold
-    # this prevents oscillating due to analog jitter
-    change = abs(cur_value - self.value)
-    if change > self.CHANGE_THRESHOLD:
-      self.prev_value = self.value
-      self.value = cur_value
-
-    self.after_read()
-
-  def after_read(self):
-    pass
-
-class Accelerator(object):
-  """A potentiometer with LEDs indicating the position"""
-  RANGE = 50  # how high does it get?
-
-  def __init__(self, device, pin, first_led_id, led_count):
-    self.sensor = Analog(device, pin)
-
+  def __init__(self, first_led_id, led_count):
+    self.prev_raw_value = 0
+    self.raw_value = 0
     self.value = None
-    self.prev_value = None
-
     self.first_led_id = first_led_id
     self.led_count = led_count
+
+    # time var
+    self.last_state_grabbed = 0
 
     # configure the colors
     self.black = Color("black")
@@ -303,34 +278,173 @@ class Accelerator(object):
         Color(rgb = (0.90, 0.05, 0)),
       ]
 
-  def read(self):
-    self.sensor.read()
-    pct = float(self.sensor.value) / self.RANGE
+  def get_state(self):
+    t = time.time()
+    if (t - self.last_state_grabbed) > self.UPDATE_INTERVAL:
+      self.last_state_grabbed = t
+      try:
+        state = peripherals.MAPLE.get_state()
+      except StandardError, e:
+        print e
+        return self.raw_value
+      else:
+        return int(state['throttle'][0])
+    else:
+      return self.raw_value
 
-    self.prev_value = self.value
-    self.value = int(self.led_count * pct)
+  def read(self):
+    cur_value = self.get_state()
+
+    # we only save the new value if it's changed more than threshold
+    # this prevents oscillating due to analog jitter
+    change = abs(cur_value - self.raw_value)
+    if change > self.CHANGE_THRESHOLD:
+      self.prev_raw_value = self.raw_value
+      self.raw_value = cur_value
+      self.value = ('low' if cur_value < 200 else
+                    'mid' if cur_value < 900 else
+                    'high')
     self.set_leds()
-    self.set_music()
 
   def set_leds(self):
     """loads the attached led string with the correct colors"""
-    if self.value == self.prev_value:
+    if self.raw_value == self.prev_raw_value:
       pass
 
-    cur_color = self.color_range[self.value]
+    num_on = self.led_count * self.raw_value / 1024
 
-    new_colors = [cur_color] * self.value     # these leds are on
-    new_colors += [self.black] * (self.led_count - self.value) # these are off
+    cur_color = self.color_range[num_on]
+
+    new_colors = [cur_color] * num_on    # these leds are on
+    new_colors += [self.black] * (self.led_count - num_on) # these are off
 
     peripherals.MAPLE.set_led_batch(self.first_led_id, new_colors[::-1])
 
-  def set_music(self):
-    pass
-
 class RotaryEncoder(object):
   """A rotary encoder!"""
-  pass
+  def __init__(self, switch_a, switch_b):
+    self.switch_a = switch_a
+    self.switch_b = switch_b
 
-class HandScanner(object):
-  """Pretends to be a hand scanner, but really just temperature"""
-  pass
+    self.last_transition = None
+
+    self.counter = 0
+    self.prev_counter = 0
+
+    self.direction = 'clockwise'
+    self.prev_direction = None
+
+  @property
+  def value(self):
+    return self.direction
+
+  @property
+  def prev_value(self):
+    return self.prev_direction
+
+  def _update(self, delta):
+    self.prev_direction = self.direction
+    self.prev_counter = self.counter
+    self.counter += delta
+    self.direction = 'clockwise' if delta == 1 else 'counter'
+
+  def read(self):
+    self.prev_counter = self.counter
+
+    self.switch_a.read()
+    self.switch_b.read()
+    a_changed = self.switch_a.prev_value != self.switch_a.value
+    b_changed = self.switch_b.prev_value != self.switch_b.value
+
+    if a_changed and b_changed:
+      self.last_transition = None
+
+    elif a_changed:
+      # we started spinning clockwise
+      if self.last_transition is None:
+        self.last_transition = 'a'
+
+      # invalid transition
+      elif self.last_transition == 'a':
+        self.last_transition = None
+
+      # completed a counter-clockwise click
+      elif self.last_transition == 'b':
+        if self.switch_a.value == self.switch_b.value:
+          self._update(-1)
+          self.last_transition = None
+        else:
+          self.last_transition = 'a'
+
+    elif b_changed:
+      # we started spinning counter
+      if self.last_transition is None:
+        self.last_transition = 'b'
+
+      # invalid transition
+      elif self.last_transition == 'b':
+        self.last_transition = None
+
+      # we think we completed a clockwise click
+      elif self.last_transition == 'a':
+        # it's only valid if the values became the same
+        if self.switch_a.value == self.switch_b.value:
+          self._update(1)
+          self.last_transition = None
+        # nope, they're different, so we should be in 'b' mode
+        else:
+          self.last_transition = 'b'
+
+class ShieldModulator(object):
+  """A rotary encoder with a ring of LEDs around it"""
+  COLORS = [
+      {'name':'cerulean', 'color': Color('blue')},
+      {'name': 'saffron', 'color': Color('yellow')},
+      {'name': 'chartreuse', 'color': Color('chartreuse')},
+      {'name': 'lavender', 'color': Color('purple')},
+    ]
+  for item in COLORS:
+    item['color'].luminance = 0.1
+
+  DIM_PCT = 0.1
+
+  def __init__(self, encoder, first_led, led_count = 12):
+    self.encoder = encoder
+    self.first_led = first_led
+    self.led_count = led_count
+
+    self.cur_idx = 0
+    self.prev_idx = -1
+    self.value = None
+    self.prev_value = None
+
+  def read(self):
+    # read the current color index
+    self.encoder.read()
+    diff = self.encoder.counter - self.encoder.prev_counter
+    self.cur_idx = (self.cur_idx + diff) % self.led_count
+
+    # save the current color as the value (retaining prev_value)
+    color_idx = self.cur_idx / (self.led_count / len(self.COLORS))
+    cur_color = self.COLORS[color_idx]
+    self.value = cur_color['name']
+
+    # do we need to update the led array?
+    if self.cur_idx != self.prev_idx:
+      self.prev_idx = self.cur_idx
+
+      # build an array of colors to populate the string
+      new_colors = []
+      for i in xrange(self.led_count):
+        color_index = len(self.COLORS) * i / self.led_count
+        color = Color(self.COLORS[color_index]['color'])
+
+        # dim inactive colors
+        if i != self.cur_idx:
+          color.luminance = color.luminance * self.DIM_PCT
+
+        new_colors.append(color)
+
+      peripherals.MAPLE.set_led_batch(self.first_led, new_colors)
+
+    self.prev_value = self.value
