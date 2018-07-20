@@ -13,6 +13,7 @@ INPUTS = [
     'control': Switch(
       device = MCP20,
       pin = 4,
+      sounds = {True: 'siren'},
     ),
     'actions': {
       'True': 'Red alert! Battle stations!',
@@ -132,8 +133,8 @@ INPUTS = [
       pin = 3,
     ),
     'actions': {
-      'True': 'Open external airlock door',
-      'False': 'Close external airlock door!',
+      'True': 'Open outer airlock door',
+      'False': 'Close outer airlock door!',
     }
   },
   {
