@@ -104,7 +104,7 @@ INPUTS = [
       device = MCP20,
       pin = 15,
       array_idx = 47,
-      blink = True,
+      blink_int = 0.5,
     ),
     'actions': {
       'False': 'Indicate left turn!',
@@ -117,7 +117,7 @@ INPUTS = [
       device = MCP20,
       pin = 11,
       array_idx = 58,
-      blink = True,
+      blink_int = 0.5,
     ),
     'actions': {
       'False': 'Indicate right turn!',
@@ -197,8 +197,8 @@ INPUTS = [
       device = MCP20,
       pin = 7,
       array_idx = 32,
-      blink = True,
       backwards = True,
+      blink_int = 0.2,
     ),
     'actions': {
       'True': 'Hasten nuclear apocalypse',

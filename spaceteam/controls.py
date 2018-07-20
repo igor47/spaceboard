@@ -8,18 +8,22 @@ from colour import Color
 import time
 
 class Switch(object):
-  def __init__(self, device, pin, sounds = None):
+  def __init__(self, device, pin, sounds = None, backwards = False):
     self.device = device
     self.pin = pin
     self.sounds = sounds
+    self.backwards = backwards
 
     self.prev_value = None
     self.value = None
 
   def active(self):
     """is the switch currently switched?"""
-    # invert -- we use pull-up resistors, so an ON switch is low
-    return not self.value
+    # we generally use pull-up resistors, so an ON switch is low
+    if self.backwards:
+      return self.value
+    else:
+      return not self.value
 
   def read(self):
     self.prev_value = self.value
@@ -67,15 +71,12 @@ class SwitchWithLight(Switch):
       self.prev_color = new_color
 
 class SwitchWithLed(Switch):
-  BLINK_INTERVAL = 0.8 # seconds
-
   def __init__(
-      self, device, pin, array_idx, sounds = None, backwards = False, blink = False):
-    Switch.__init__(self, device, pin, sounds)
+      self, device, pin, array_idx, sounds = None, backwards = False, blink_int = 0):
+    Switch.__init__(self, device, pin, sounds, backwards)
     self.array_idx = array_idx
 
-    self.backwards = backwards
-    self.blink = blink
+    self.blink_int = blink_int
 
     self.last_blink = 0
     self.blink_state = True
@@ -86,12 +87,10 @@ class SwitchWithLed(Switch):
 
   def set_color(self):
     new_state = True if self.active() else False
-    if self.backwards:
-      new_state = not new_state
 
-    if self.blink:
+    if self.blink_int > 0:
       t = time.time()
-      if (t - self.last_blink) > self.BLINK_INTERVAL:
+      if (t - self.last_blink) > self.blink_int:
         self.last_blink = t
         self.blink_state = not self.blink_state
 
