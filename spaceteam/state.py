@@ -383,6 +383,7 @@ INPUTS = [
       device = MCP27,
       pin = 11,
       array_idx = 57,
+      sounds = {False: 'coffee'},
     ),
     'actions': {
       'True': "You've had enough coffee.",
