@@ -395,7 +395,7 @@ INPUTS = [
     'id': "silver_toggle_bottom_1",
     'control': SwitchWithLed(
       device = MCP27,
-      pin = 12,
+      pin = 5,
       array_idx = 44,
     ),
     'actions': {
