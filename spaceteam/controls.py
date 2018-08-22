@@ -241,7 +241,7 @@ class Throttle(object):
   """A bigass knife switch with a potentiometer and some leds under it."""
   UPDATE_INTERVAL = 0.2
   MIN_VAL = 0
-  MAX_VAL = 3000
+  MAX_VAL = 2900
   CHANGE_THRESHOLD = 50
 
   def __init__(self, first_led_id, led_count):
@@ -250,8 +250,8 @@ class Throttle(object):
 
     self.prev_value = None
     self.value = None
-    self.raw_value = None
-    self.led_value = None
+    self.raw_value = 0
+    self.led_value = 0
 
     # time var
     self.last_state_grabbed = 0
@@ -299,7 +299,7 @@ class Throttle(object):
     # we only save the new value if it's changed more than threshold
     # this prevents oscillating due to analog jitter
     new_raw_value = self.get_state()
-    change = abs(cur_value - self.raw_value)
+    change = abs(new_raw_value - self.raw_value)
     if change < self.CHANGE_THRESHOLD:
       return
 
@@ -324,7 +324,7 @@ class Throttle(object):
     new_colors = [cur_color] * num_on    # these leds are on
     new_colors += [self.black] * (self.led_count - num_on) # these are off
 
-    peripherals.MAPLE.set_led_batch(self.first_led_id, new_colors[::-1])
+    peripherals.MAPLE.set_led_batch(self.first_led_id, new_colors)
 
 class RotaryEncoder(object):
   """A rotary encoder!"""
