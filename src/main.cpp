@@ -73,13 +73,8 @@ void setup()
   strip.begin();
   strip.show();
 
-  // NOTE: this causes some sort of initialization without which the led strip
-  // doesn't work at all >:-|
-  delay(1);
-  // NOTE: DO NOT REMOVE ABOVE LINE
-
   // allows a quick visual check that all the leds work/a reset just happened
-  colorWipe(strip.Color(20, 20, 20), 50);
+  colorWipe(strip.Color(20, 20, 20), 20);
   clearStrip();
 
   // initialize led array
@@ -294,7 +289,7 @@ void arrayWipe() {
   for(bit = 0; bit < ARRAY_COUNT; bit++) {
     digitalWrite(ARRAY_CLOCK_PIN, HIGH);
     digitalWrite(ARRAY_CLOCK_PIN, LOW);
-    delay(20);
+    delay(10);
   }
 
   // turn off pass-through
