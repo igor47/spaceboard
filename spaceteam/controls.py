@@ -239,15 +239,19 @@ class Keypad(object):
 
 class Throttle(object):
   """A bigass knife switch with a potentiometer and some leds under it."""
-  CHANGE_THRESHOLD = 2
   UPDATE_INTERVAL = 0.2
+  MIN_VAL = 0
+  MAX_VAL = 3000
+  CHANGE_THRESHOLD = 50
 
   def __init__(self, first_led_id, led_count):
-    self.prev_raw_value = 0
-    self.raw_value = 0
-    self.value = None
     self.first_led_id = first_led_id
     self.led_count = led_count
+
+    self.prev_value = None
+    self.value = None
+    self.raw_value = None
+    self.led_value = None
 
     # time var
     self.last_state_grabbed = 0
@@ -257,34 +261,32 @@ class Throttle(object):
     self.color_range = [
         Color(rgb = (0, 0.02, 0)),
         Color(rgb = (0, 0.10, 0)),
-        Color(rgb = (0, 0.15, 0)),
         Color(rgb = (0, 0.20, 0)),
         Color(rgb = (0, 0.35, 0)),
-
         Color(rgb = (0, 0.40, 0.05)),
+
         Color(rgb = (0, 0.55, 0.10)),
         Color(rgb = (0, 0.65, 0.15)),
-        Color(rgb = (0, 0.70, 0.25)),
         Color(rgb = (0, 0.75, 0.30)),
-
         Color(rgb = (0.10, 0.60, 0.20)),
         Color(rgb = (0.25, 0.50, 0.10)),
+
         Color(rgb = (0.40, 0.40, 0.05)),
         Color(rgb = (0.60, 0.30, 0)),
         Color(rgb = (0.70, 0.20, 0)),
-
         Color(rgb = (0.80, 0.10, 0)),
         Color(rgb = (0.90, 0.05, 0)),
       ]
 
   def get_state(self):
+    """reads the raw value of throttle from the microcontroller"""
     t = time.time()
     if (t - self.last_state_grabbed) > self.UPDATE_INTERVAL:
       self.last_state_grabbed = t
       try:
         state = peripherals.MAPLE.get_state()
       except StandardError, e:
-        print e
+        print "Error reading throttle value: %s" % e
         return self.raw_value
       else:
         return int(state['throttle'][0])
@@ -292,27 +294,32 @@ class Throttle(object):
       return self.raw_value
 
   def read(self):
-    cur_value = self.get_state()
+    self.prev_value = self.value
 
     # we only save the new value if it's changed more than threshold
     # this prevents oscillating due to analog jitter
+    new_raw_value = self.get_state()
     change = abs(cur_value - self.raw_value)
-    if change > self.CHANGE_THRESHOLD:
-      self.prev_raw_value = self.raw_value
-      self.raw_value = cur_value
-      self.value = ('low' if cur_value < 200 else
-                    'mid' if cur_value < 900 else
-                    'high')
+    if change < self.CHANGE_THRESHOLD:
+      return
+
+    # save the raw value
+    self.raw_value = new_raw_value
+
+    # what's our LED value?
+    self.led_value = self.raw_value * self.led_count / (self.MAX_VAL - self.MIN_VAL)
     self.set_leds()
+
+    # what values does this device have, anyway?
+    if self.led_value > (self.led_count / 2):
+      self.value = 'high'
+    else:
+      self.value = 'low'
 
   def set_leds(self):
     """loads the attached led string with the correct colors"""
-    if self.raw_value == self.prev_raw_value:
-      pass
-
-    num_on = self.led_count * self.raw_value / 1024
-
-    cur_color = self.color_range[num_on]
+    num_on = self.led_value
+    cur_color = self.color_range[num_on if num_on < len(self.color_range) else -1]
 
     new_colors = [cur_color] * num_on    # these leds are on
     new_colors += [self.black] * (self.led_count - num_on) # these are off

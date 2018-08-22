@@ -625,16 +625,12 @@ INPUTS = [
     ),
     'actions': {"%03d" % n: "Set course to %d!" % n for n in xrange(999)}
 	},
-]
-
-disabled_controls = [
   {
     'id': 'throttle',
     'control': Throttle(first_led_id=37, led_count=15),
     'actions': {
-      'low': 'Set throttle to minimum',
-      'mid': 'Set throttle to medium',
-      'high': 'Set throttle to maximum',
+      'low': 'Ease off the throttle, cowperson!',
+      'high': 'Hit the throttle, pilot!',
     },
   },
 ]
